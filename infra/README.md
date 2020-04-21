@@ -83,7 +83,6 @@ terraform -v
 
 # Provision environment
 ```
-az login
 cd ~/ktwh-azure-git/infra
 terraform init
 terraform apply -var-file=azurerm-secret.tfvars
@@ -112,8 +111,12 @@ subscription_id = "<SUBSCRIPTION_ID>"
 tenant_id = "<TENANT_ID>"
 client_id = "<CLIENT_ID>"
 client_secret = "<CLIENT_SECRET>"
-environment = "<ENVIRONMENT>" (e.g. "play" or "poc" or "dev" or "test" etc.)
-location = "<LOCATION>" (e.g. "Australia East" or "Southeast Asia" etc.)
+environment = "<ENVIRONMENT>" (e.g. "play" or "poc" or "dev" or "demo" etc.)
+location = "<LOCATION>" (e.g. "Australia East" or "Southeast Asia" or "Central US" etc. - for more, run "az account list-locations -o table")
 ssh_key_file = "<SSH_PUBLIC_KEY_FILE>"
+master_vm_size = "<MASTER_VM_SIZE>" (e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table")
+master_vm_count = "<MASTER_VM_COUNT>" (e.g. 1 or 2 etc.)
+worker_vm_size = "<WORKER_VM_SIZE>" (e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table")
+worker_vm_count = "<WORKER_VM_COUNT>" (e.g. 1 or 2 etc.)
 EOF
 ```

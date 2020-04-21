@@ -19,6 +19,25 @@ variable "location" {
 variable "ssh_key_file" {
   default = ""
 }
+variable "prefix" {
+  default = "kthw"
+}
+variable "master_vm_size" {
+  default = "Standard_B1ms"
+}
+variable "master_vm_count" {
+  default = "1"
+}
+variable "worker_vm_size" {
+  default = "Standard_B1ms"
+}
+variable "worker_vm_count" {
+  default = "1"
+}
+variable "enable_health_probe" {
+  default = false
+}
+
 
 # initialise azure resource manager provider
 provider "azurerm" {
@@ -27,11 +46,12 @@ provider "azurerm" {
   client_id = var.client_id
   client_secret = var.client_secret
   features {}
+  version = "=2.6.0"
 }
 
 # single resource group
 resource "azurerm_resource_group" "rg01" {
-  name = "kthw-${var.environment}-rg01"
+  name = "${var.prefix}-${var.environment}-rg01"
   location = var.location
 
   tags = {
@@ -41,7 +61,7 @@ resource "azurerm_resource_group" "rg01" {
 
 # single virtual network
 resource "azurerm_virtual_network" "vnet01" {
-  name = "kthw-${var.environment}-vnet01"
+  name = "${var.prefix}-${var.environment}-vnet01"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   address_space = ["10.240.0.0/24"]
@@ -53,7 +73,7 @@ resource "azurerm_virtual_network" "vnet01" {
 
 # single subnet
 resource "azurerm_subnet" "subnet01" {
-  name = "kthw-${var.environment}-subnet01"
+  name = "${var.prefix}-${var.environment}-subnet01"
   resource_group_name = azurerm_resource_group.rg01.name
   virtual_network_name = azurerm_virtual_network.vnet01.name
   address_prefix = "10.240.0.0/24"
@@ -96,7 +116,7 @@ resource "azurerm_subnet_route_table_association" "subnet01-rt01" {
 
 # network security group (nsg) to act as firewall
 resource "azurerm_network_security_group" "nsg01" {
-  name = "kthw-${var.environment}-nsg01"
+  name = "${var.prefix}-${var.environment}-nsg01"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
 
@@ -177,7 +197,7 @@ resource "azurerm_subnet_network_security_group_association" "subnet01-nsg01" {
 
 # master nodes availability set
 resource "azurerm_availability_set" "masteras01" {
-  name = "kthw-${var.environment}-masteras01"
+  name = "${var.prefix}-${var.environment}-masteras01"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   platform_fault_domain_count = 2
@@ -190,14 +210,14 @@ resource "azurerm_availability_set" "masteras01" {
 
 # master node - public ip address
 resource "azurerm_public_ip" "masterpip" {
-  name = "kthw-${var.environment}-masterpip0${count.index + 1}"
+  name = "${var.prefix}-${var.environment}-masterpip0${count.index + 1}"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   sku = "Basic"
   allocation_method = "Static"
-  domain_name_label = "kthw-${var.environment}-mastervm0${count.index + 1}"
+  domain_name_label = "${var.prefix}-${var.environment}-mastervm0${count.index + 1}"
 
-  count = 2
+  count = var.master_vm_count
 
   tags = {
     managedby = "terraform"
@@ -206,7 +226,7 @@ resource "azurerm_public_ip" "masterpip" {
 
 # master node - network interface card (nic)
 resource "azurerm_network_interface" "masternic" {
-  name = "kthw-${var.environment}-masternic0${count.index + 1}"
+  name = "${var.prefix}-${var.environment}-masternic0${count.index + 1}"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   enable_ip_forwarding = true
@@ -218,7 +238,7 @@ resource "azurerm_network_interface" "masternic" {
     public_ip_address_id = azurerm_public_ip.masterpip[count.index].id
   }
 
-  count = 2
+  count = var.master_vm_count
 
   tags = {
     managedby = "terraform"
@@ -227,12 +247,12 @@ resource "azurerm_network_interface" "masternic" {
 
 # master node - virtual machine (vm)
 resource "azurerm_linux_virtual_machine" "mastervm" {
-  name = "kthw-${var.environment}-mastervm0${count.index + 1}"
+  name = "${var.prefix}-${var.environment}-mastervm0${count.index + 1}"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
-  size = "Standard_B1ms"
+  size = var.master_vm_size
   availability_set_id = azurerm_availability_set.masteras01.id
-  admin_username ="ankur"
+  admin_username ="usr1"
   network_interface_ids = [azurerm_network_interface.masternic[count.index].id]
 
   source_image_reference {
@@ -243,18 +263,18 @@ resource "azurerm_linux_virtual_machine" "mastervm" {
   }
 
   os_disk {
-    name = "kthw-${var.environment}-masterdisk0${count.index + 1}"
+    name = "${var.prefix}-${var.environment}-masterdisk0${count.index + 1}"
     caching = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
     disk_size_gb = "32"
   }
 
   admin_ssh_key {
-    username = "ankur"
+    username = "usr1"
     public_key = file(var.ssh_key_file)
   }
 
-  count = 2
+  count = var.master_vm_count
 
   tags = {
     managedby = "terraform"
@@ -262,25 +282,25 @@ resource "azurerm_linux_virtual_machine" "mastervm" {
 }
 
 
-# worker vm - public ip address
+# worker node - public ip address
 resource "azurerm_public_ip" "workerpip" {
-  name = "kthw-${var.environment}-workerpip0${count.index + 1}"
+  name = "${var.prefix}-${var.environment}-workerpip0${count.index + 1}"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   sku = "Basic"
   allocation_method = "Static"
-  domain_name_label = "kthw-${var.environment}-workervm0${count.index + 1}"
+  domain_name_label = "${var.prefix}-${var.environment}-workervm0${count.index + 1}"
 
-  count = 2
+  count = var.worker_vm_count
 
   tags = {
     managedby = "terraform"
   }
 }
 
-# worker vm - network interface card (nic)
+# worker node - network interface card (nic)
 resource "azurerm_network_interface" "workernic" {
-  name = "kthw-${var.environment}-workernic0${count.index + 1}"
+  name = "${var.prefix}-${var.environment}-workernic0${count.index + 1}"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   enable_ip_forwarding = true
@@ -292,20 +312,20 @@ resource "azurerm_network_interface" "workernic" {
     public_ip_address_id = azurerm_public_ip.workerpip[count.index].id
   }
 
-  count = 2
+  count = var.worker_vm_count
 
   tags = {
     managedby = "terraform"
   }
 }
 
-# worker vm - virtual machine (vm)
+# worker node - virtual machine (vm)
 resource "azurerm_linux_virtual_machine" "workervm" {
-  name = "kthw-${var.environment}-workervm0${count.index + 1}"
+  name = "${var.prefix}-${var.environment}-workervm0${count.index + 1}"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
-  size = "Standard_B1s"
-  admin_username ="ankur"
+  size = var.worker_vm_size
+  admin_username ="usr1"
   network_interface_ids = [azurerm_network_interface.workernic[count.index].id]
 
   source_image_reference {
@@ -316,18 +336,18 @@ resource "azurerm_linux_virtual_machine" "workervm" {
   }
 
   os_disk {
-    name = "kthw-${var.environment}-workerdisk0${count.index + 1}"
+    name = "${var.prefix}-${var.environment}-workerdisk0${count.index + 1}"
     caching = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
     disk_size_gb = "32"
   }
 
   admin_ssh_key {
-    username = "ankur"
+    username = "usr1"
     public_key = file(var.ssh_key_file)
   }
 
-  count = 2
+  count = var.worker_vm_count
 
   tags = {
     managedby = "terraform"
@@ -337,12 +357,12 @@ resource "azurerm_linux_virtual_machine" "workervm" {
 
 # network load balancer - public ip address
 resource "azurerm_public_ip" "lbpip01" {
-  name = "kthw-${var.environment}-lbpip01"
+  name = "${var.prefix}-${var.environment}-lbpip01"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   sku = "Basic"
   allocation_method = "Static"
-  domain_name_label = "kthw-${var.environment}-apiserver"
+  domain_name_label = "${var.prefix}-${var.environment}-apiserver"
 
   tags = {
     managedby = "terraform"
@@ -351,13 +371,13 @@ resource "azurerm_public_ip" "lbpip01" {
 
 # network load balancer
 resource "azurerm_lb" "lb01" {
-  name = "kthw-${var.environment}-lb01"
+  name = "${var.prefix}-${var.environment}-lb01"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   sku = "Basic"
 
   frontend_ip_configuration {
-    name = "kthw-${var.environment}-apiserver"
+    name = "${var.prefix}-${var.environment}-apiserver"
     public_ip_address_id = azurerm_public_ip.lbpip01.id
   }
 
@@ -368,28 +388,23 @@ resource "azurerm_lb" "lb01" {
 
 # network load balancer - backend address pool
 resource "azurerm_lb_backend_address_pool" "bap01" {
-  name = "kthw-${var.environment}-bap01"
+  name = "${var.prefix}-${var.environment}-bap01"
   resource_group_name = azurerm_resource_group.rg01.name
   loadbalancer_id = azurerm_lb.lb01.id
 }
 
-# network load balancer - associate network interface card of master node 01 to backend address pool
-resource "azurerm_network_interface_backend_address_pool_association" "bapa01" {
-  network_interface_id = azurerm_network_interface.masternic[0].id
+# network load balancer - associate network interface card of master nodes to backend address pool
+resource "azurerm_network_interface_backend_address_pool_association" "bapa" {
+  network_interface_id = azurerm_network_interface.masternic[count.index].id
   ip_configuration_name = "primary"
   backend_address_pool_id = azurerm_lb_backend_address_pool.bap01.id
-}
 
-# network load balancer - associate network interface card of master node 02 to backend address pool
-resource "azurerm_network_interface_backend_address_pool_association" "bapa02" {
-  network_interface_id = azurerm_network_interface.masternic[1].id
-  ip_configuration_name = "primary"
-  backend_address_pool_id = azurerm_lb_backend_address_pool.bap01.id
+  count = var.master_vm_count
 }
 
 # network load balancer - health probe
 resource "azurerm_lb_probe" "lbp01" {
-  name = "kthw-${var.environment}-lbp01"
+  name = "${var.prefix}-${var.environment}-lbp01"
   resource_group_name = azurerm_resource_group.rg01.name
   loadbalancer_id = azurerm_lb.lb01.id
   protocol = "Http"
@@ -398,15 +413,34 @@ resource "azurerm_lb_probe" "lbp01" {
   interval_in_seconds = 10
 }
 
-# network load balancer - load balancing rule
+# network load balancer - load balancing rule with health probe
 resource "azurerm_lb_rule" "lbr01" {
-  name = "kthw-${var.environment}-lbr01"
+  name = "${var.prefix}-${var.environment}-lbr01"
   resource_group_name = azurerm_resource_group.rg01.name
   loadbalancer_id = azurerm_lb.lb01.id
-  frontend_ip_configuration_name = "kthw-${var.environment}-apiserver"
+  frontend_ip_configuration_name = "${var.prefix}-${var.environment}-apiserver"
   protocol = "Tcp"
   frontend_port = "6443"
   backend_port = "6443"
   backend_address_pool_id = azurerm_lb_backend_address_pool.bap01.id
+
+  # attach health probe
   probe_id = azurerm_lb_probe.lbp01.id
+
+  count = var.enable_health_probe ? 1 : 0
+}
+
+# network load balancer - load balancing rule without health probe
+resource "azurerm_lb_rule" "lbr01noprobe" {
+  name = "${var.prefix}-${var.environment}-lbr01"
+  resource_group_name = azurerm_resource_group.rg01.name
+  loadbalancer_id = azurerm_lb.lb01.id
+  frontend_ip_configuration_name = "${var.prefix}-${var.environment}-apiserver"
+  protocol = "Tcp"
+  frontend_port = "6443"
+  backend_port = "6443"
+  backend_address_pool_id = azurerm_lb_backend_address_pool.bap01.id
+
+  # un-attach health probe
+  count = var.enable_health_probe ? 0 : 1
 }
