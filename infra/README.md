@@ -22,17 +22,6 @@ sudo apt-get install -y \
      software-properties-common
 ```
 
-## - Install docker ce:
-```
-curl -fsSL "https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:])/gpg" | sudo apt-key add -
-
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:]) \
-$(lsb_release -cs | tr -td '\n' | tr [:upper:] [:lower:]) stable"
-
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli
-```
-
 ## - Clean ktwh-azure directory, if already exists
 ```
 rm ~/ktwh-azure-git -rf
@@ -43,7 +32,21 @@ rm ~/ktwh-azure-git -rf
 git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git ~/ktwh-azure-git
 ```
 
+---
+---
+
 # Install remaining pre-requisites as docker image (recommended)
+
+## - Install docker ce:
+```
+curl -fsSL "https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:])/gpg" | sudo apt-key add -
+
+sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:]) \
+$(lsb_release -cs | tr -td '\n' | tr [:upper:] [:lower:]) stable"
+
+sudo apt-get update
+sudo apt-get install -y docker-ce docker-ce-cli
+```
 
 ## - Build docker image with the image name as ktwh-azure-image
 ```
@@ -81,6 +84,9 @@ rm terraform_0.12.24_linux_amd64.zip
 terraform -v
 ```
 
+---
+---
+
 # Provision environment
 ```
 cd ~/ktwh-azure-git/infra
@@ -114,6 +120,7 @@ client_secret = "<CLIENT_SECRET>"
 environment = "<ENVIRONMENT>" (e.g. "play" or "poc" or "dev" or "demo" etc.)
 location = "<LOCATION>" (e.g. "Australia East" or "Southeast Asia" or "Central US" etc. - for more, run "az account list-locations -o table")
 ssh_key_file = "<SSH_PUBLIC_KEY_FILE>"
+prefix = "<PREFIX>" (e.g. "kthw" or "kube" etc.)
 master_vm_size = "<MASTER_VM_SIZE>" (e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table")
 master_vm_count = "<MASTER_VM_COUNT>" (e.g. 1 or 2 etc.)
 worker_vm_size = "<WORKER_VM_SIZE>" (e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table")
