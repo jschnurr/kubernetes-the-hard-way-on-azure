@@ -81,7 +81,7 @@ resource "azurerm_subnet" "subnet01" {
 
 # network route table for free communication of pods b/w nodes
 resource "azurerm_route_table" "rt01" {
-  name = "poc-kube-rt01"
+  name = "${var.prefix}-${var.environment}-rt01"
   resource_group_name = azurerm_resource_group.rg01.name
   location = azurerm_resource_group.rg01.location
   disable_bgp_route_propagation = false
@@ -90,21 +90,55 @@ resource "azurerm_route_table" "rt01" {
     name           = "workervm01"
     address_prefix = "10.200.1.0/24"
     next_hop_type  = "VirtualAppliance"
-    next_hop_in_ip_address = "10.240.0.20"
+    next_hop_in_ip_address = "10.240.0.21"
   }
-
   route {
     name           = "workervm02"
     address_prefix = "10.200.2.0/24"
     next_hop_type  = "VirtualAppliance"
-    next_hop_in_ip_address = "10.240.0.21"
+    next_hop_in_ip_address = "10.240.0.22"
   }
-
   route {
     name           = "workervm03"
     address_prefix = "10.200.3.0/24"
     next_hop_type  = "VirtualAppliance"
-    next_hop_in_ip_address = "10.240.0.22"
+    next_hop_in_ip_address = "10.240.0.23"
+  }
+  route {
+    name           = "workervm04"
+    address_prefix = "10.200.4.0/24"
+    next_hop_type  = "VirtualAppliance"
+    next_hop_in_ip_address = "10.240.0.24"
+  }
+  route {
+    name           = "workervm05"
+    address_prefix = "10.200.5.0/24"
+    next_hop_type  = "VirtualAppliance"
+    next_hop_in_ip_address = "10.240.0.25"
+  }
+  route {
+    name           = "workervm06"
+    address_prefix = "10.200.6.0/24"
+    next_hop_type  = "VirtualAppliance"
+    next_hop_in_ip_address = "10.240.0.26"
+  }
+  route {
+    name           = "workervm07"
+    address_prefix = "10.200.7.0/24"
+    next_hop_type  = "VirtualAppliance"
+    next_hop_in_ip_address = "10.240.0.27"
+  }
+  route {
+    name           = "workervm08"
+    address_prefix = "10.200.8.0/24"
+    next_hop_type  = "VirtualAppliance"
+    next_hop_in_ip_address = "10.240.0.28"
+  }
+  route {
+    name           = "workervm09"
+    address_prefix = "10.200.9.0/24"
+    next_hop_type  = "VirtualAppliance"
+    next_hop_in_ip_address = "10.240.0.29"
   }
 }
 
