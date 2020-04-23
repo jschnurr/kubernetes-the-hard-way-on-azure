@@ -3,7 +3,7 @@
 ## Create and install certificates
 ```
 # comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
-sudo sed -i '0,/RANDFILE/{s/RANDFILE/\#&/}' /etc/ssl/openssl.cnf
+sudo sed -i '0,/RANDFILE/{s/^RANDFILE/\#&/}' /etc/ssl/openssl.cnf
 
 # modify user permissions to read, write and execute all shell scripts
 cd ~/kthw-azure-git/scripts
@@ -68,7 +68,7 @@ cd ~/kthw-azure-git/scripts/master
 openssl x509 -text -in certs/etcd-server.crt
 ```
 
-### Create kube api server certificate
+### Create kube-apiserver certificate
 ```
 cd ~/kthw-azure-git/scripts/master
 
