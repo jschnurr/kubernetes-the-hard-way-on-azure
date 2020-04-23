@@ -1,0 +1,26 @@
+[req]
+req_extensions = v3_req
+distinguished_name = req_distinguished_name
+[req_distinguished_name]
+[ v3_req ]
+basicConstraints = CA:FALSE
+keyUsage = nonRepudiation, digitalSignature, keyEncipherment
+subjectAltName = @alt_names
+[alt_names]
+DNS.1 = kubernetes
+DNS.2 = kubernetes.default
+DNS.3 = kubernetes.default.svc
+DNS.4 = kubernetes.default.svc.cluster.local
+DNS.5 = <PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com
+DNS.6 = <PREFIX>-<ENVIRONMENT>-mastervm01
+DNS.7 = <PREFIX>-<ENVIRONMENT>-mastervm02
+DNS.8 = <PREFIX>-<ENVIRONMENT>-mastervm03
+DNS.9 = <PREFIX>-<ENVIRONMENT>-mastervm04
+DNS.10 = <PREFIX>-<ENVIRONMENT>-mastervm05
+IP.1 = 127.0.0.1
+IP.2 = 10.32.0.1
+IP.3 = 10.240.0.11
+IP.4 = 10.240.0.12
+IP.5 = 10.240.0.13
+IP.6 = 10.240.0.14
+IP.7 = 10.240.0.15

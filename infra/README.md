@@ -22,14 +22,14 @@ sudo apt-get install -y \
      software-properties-common
 ```
 
-## - Clean ktwh-azure directory, if already exists
+## - Clean kthw-azure directory, if already exists
 ```
-rm ~/ktwh-azure-git -rf
+rm ~/kthw-azure-git -rf
 ```
 
-## - Clone git repo into ktwh-azure git directory
+## - Clone git repo into kthw-azure git directory
 ```
-git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git ~/ktwh-azure-git
+git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git ~/kthw-azure-git
 ```
 
 ---
@@ -48,15 +48,15 @@ sudo apt-get update
 sudo apt-get install -y docker-ce docker-ce-cli
 ```
 
-## - Build docker image with the image name as ktwh-azure-image
+## - Build docker image with the image name as kthw-azure-image
 ```
-cd ~/ktwh-azure-git/infra
-docker build -t ktwh-azure-image .
+cd ~/kthw-azure-git/infra
+docker build -t kthw-azure-image .
 ```
 
-## - Run docker in interactive terminal with ktwh-azure-git directory mounted from the host machine
+## - Run docker in interactive terminal with kthw-azure-git directory mounted from the host machine
 ```
-docker run -it --rm --name=ktwh-azure-container --mount type=bind,source=$HOME/ktwh-azure-git,target=/root/ktwh-azure-git ktwh-azure-image bash
+docker run -it --rm --name=kthw-azure-container --mount type=bind,source=$HOME/kthw-azure-git,target=/root/kthw-azure-git kthw-azure-image bash
 ```
 
 # Or, install remaining pre-requisites directly on host (not recommended)
@@ -89,7 +89,7 @@ terraform -v
 
 # Provision environment
 ```
-cd ~/ktwh-azure-git/infra
+cd ~/kthw-azure-git/infra
 terraform init
 terraform apply -var-file=azurerm-secret.tfvars
 ```
@@ -111,19 +111,51 @@ ssh-keygen -b 4096 -t rsa -C <EMAIL_ADDRESS>
 
 # note the path of the file "~/.ssh/id_rsa.pub" as <SSH_PUBLIC_KEY_FILE>
 
-# substitute the values inside <> as appropriate
-cat >~/ktwh-azure-git/infra/azurerm-secret.tfvars <<EOF
-subscription_id = "<SUBSCRIPTION_ID>"
-tenant_id = "<TENANT_ID>"
-client_id = "<CLIENT_ID>"
-client_secret = "<CLIENT_SECRET>"
-environment = "<ENVIRONMENT>" (e.g. "play" or "poc" or "dev" or "demo" etc.)
-location = "<LOCATION>" (e.g. "Australia East" or "Southeast Asia" or "Central US" etc. - for more, run "az account list-locations -o table")
-ssh_key_file = "<SSH_PUBLIC_KEY_FILE>"
-prefix = "<PREFIX>" (e.g. "kthw" or "kube" etc.)
-master_vm_size = "<MASTER_VM_SIZE>" (e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table")
-master_vm_count = "<MASTER_VM_COUNT>" (e.g. 1 or 2 etc.)
-worker_vm_size = "<WORKER_VM_SIZE>" (e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table")
-worker_vm_count = "<WORKER_VM_COUNT>" (e.g. 1 or 2 etc.)
-EOF
-```
+# copy the template variable file
+cp azurerm.tfvars azurerm-secret.tfvars
+
+# substitute the value for <SUBSCRIPTION_ID> by replacing VALUE in the following command:
+sed -i 's/<SUBSCRIPTION_ID>/VALUE/g' azurerm-secret.tfvars
+# for e.g., the command to substitute the value for <SUBSCRIPTION_ID> with 794a7d2a-565a-4ebd-8dd9-0439763e6b55 as VALUE looks like this:
+sed -i 's/<SUBSCRIPTION_ID>/794a7d2a-565a-4ebd-8dd9-0439763e6b55/g' azurerm-secret.tfvars
+
+# substitute the value for <TENANT_ID> by replacing VALUE in the following command:
+sed -i 's/<TENANT_ID>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <CLIENT_ID> by replacing VALUE in the following command:
+sed -i 's/<CLIENT_ID>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <CLIENT_SECRET> by replacing VALUE in the following command:
+sed -i 's/<CLIENT_SECRET>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <SSH_PUBLIC_KEY_FILE> by replacing VALUE in the following command:
+# VALUE e.g. "~/.ssh/id_rsa.pub"
+sed -i 's/<SSH_PUBLIC_KEY_FILE>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <ENVIRONMENT> by replacing VALUE in the following command:
+# VALUE e.g. "play" or "poc" or "dev" or "demo" etc.
+sed -i 's/<ENVIRONMENT>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <LOCATION> by replacing VALUE in the following command:
+# VALUE e.g. "Australia East" or "Southeast Asia" or "Central US" etc. - for more, run "az account list-locations -o table"
+sed -i 's/<LOCATION>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <PREFIX> by replacing VALUE in the following command:
+# VALUE e.g. "kthw" or "kube" etc.
+sed -i 's/<PREFIX>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <MASTER_VM_SIZE> by replacing VALUE in the following command:
+# VALUE e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table"
+sed -i 's/<MASTER_VM_SIZE>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <MASTER_VM_COUNT> by replacing VALUE in the following command:
+# VALUE e.g. 1 or 2 etc.
+sed -i 's/<MASTER_VM_COUNT>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <WORKER_VM_SIZE> by replacing VALUE in the following command:
+# VALUE e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table"
+sed -i 's/<WORKER_VM_SIZE>/VALUE/g' azurerm-secret.tfvars
+
+# substitute the value for <WORKER_VM_COUNT> by replacing VALUE in the following command:
+# VALUE e.g. 1 or 2 etc.
+sed -i 's/<WORKER_VM_COUNT>/VALUE/g' azurerm-secret.tfvars
