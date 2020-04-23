@@ -7,11 +7,11 @@
 # create private key
 openssl genrsa -out certs/$1.key 2048
 
-# create csr using private key
+# create certificate signing request (csr) using private key and openssl configuration file
 openssl req -new -key certs/$1.key -subj "$3" -out certs/$1.csr -config $4.cnf
 
-# sign the csr using ca private key
+# sign csr using ca private key and openssl configuration file
 openssl x509 -req -in certs/$1.csr -CA certs/$2.crt -CAkey certs/$2.key -CAcreateserial -out certs/$1.crt -days 1000 -extensions v3_req -extfile $4.cnf
 
-# delete the csr
+# delete csr
 rm certs/$1.csr

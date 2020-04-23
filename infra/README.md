@@ -22,7 +22,7 @@ sudo apt-get install -y \
      software-properties-common
 ```
 
-## - Clean kthw-azure directory, if already exists
+## - Clean kthw-azure-git directory, if already exists
 ```
 rm ~/kthw-azure-git -rf
 ```
@@ -54,7 +54,7 @@ cd ~/kthw-azure-git/infra
 docker build -t kthw-azure-image .
 ```
 
-## - Run docker in interactive terminal with kthw-azure-git directory mounted from the host machine
+## - Run docker container in interactive terminal with kthw-azure-git directory mounted from the host machine
 ```
 docker run -it --rm --name=kthw-azure-container --mount type=bind,source=$HOME/kthw-azure-git,target=/root/kthw-azure-git kthw-azure-image bash
 ```
@@ -71,7 +71,7 @@ cd ~
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
 
-## - Install terraform from https://learn.hashicorp.com/terraform/getting-started/install.html to find the latest package (v0.12.24 at the time of writing):
+## - Install terraform
 ```
 wget https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip
 unzip terraform_0.12.24_linux_amd64.zip
@@ -112,6 +112,7 @@ ssh-keygen -b 4096 -t rsa -C <EMAIL_ADDRESS>
 # note the path of the file "~/.ssh/id_rsa.pub" as <SSH_PUBLIC_KEY_FILE>
 
 # copy the template variable file
+cd ~/kthw-azure-git/infra
 cp azurerm.tfvars azurerm-secret.tfvars
 
 # substitute the value for <SUBSCRIPTION_ID> by replacing VALUE in the following command:
