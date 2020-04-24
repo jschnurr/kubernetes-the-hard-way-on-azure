@@ -18,7 +18,7 @@ sudo apt-get install -y \
      ca-certificates \
      curl wget unzip tar openssl git \
      lsb-release \
-     gnupg-agent \
+     gnupg-agent gnupg2 \
      software-properties-common
 ```
 
@@ -69,6 +69,14 @@ cd ~
 ## - Install az cli
 ```
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
+```
+
+## - Install kubectl
+```
+curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
+apt-get update
+apt-get install -y kubectl
 ```
 
 ## - Install terraform
