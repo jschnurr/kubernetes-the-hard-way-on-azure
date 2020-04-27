@@ -1,5 +1,5 @@
 #!/bin/bash
-# $1 = ca certificate
+# $1 = ca certificate file name w/o extension
 # $2 = ca subject
 
 # create private key

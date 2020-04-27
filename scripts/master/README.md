@@ -72,7 +72,7 @@ openssl x509 -text -in certs/etcd-server.crt
 ```
 cd ~/kthw-azure-git/scripts/master
 
-# copy the template openssl config
+# copy the template openssl config file
 cp openssl-kube-apiserver.cnf openssl-kube-apiserver-secret.cnf
 
 # generate openssl configuration file for your environment by replacing VALUE in the following command:
@@ -89,4 +89,90 @@ sed -i 's/<PREFIX>/kthw/g; s/<ENVIRONMENT>/play/g; s/<LOCATION_CODE>/australiaea
 
 # verify the generated cert
 openssl x509 -text -in certs/kube-apiserver.crt
+```
+
+## Install etcd server
+
+### Remote copy files to master node
+```
+cd ~/kthw-azure-git/scripts/master
+
+# remote copy to the mastervm01
+scp certs/ca.crt certs/etcd* etcd.service \
+    usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com:~
+```
+
+### Download, install and configure etcd server (inside master node)
+```
+# remote login to the mastervm01
+ssh usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com
+
+cd ~
+
+# download etcd v3.4.7 
+wget -q --show-progress --https-only --timestamping \
+    "https://github.com/etcd-io/etcd/releases/download/v3.4.7/etcd-v3.4.7-linux-amd64.tar.gz"
+
+# extract etcd binaries and install
+{
+  tar -xvf etcd-v3.4.7-linux-amd64.tar.gz
+  sudo mv etcd-v3.4.7-linux-amd64/etcd* /usr/local/bin/
+  rm etcd-v3.4.7-linux-amd64.tar.gz
+  rm etcd-v3.4.7-linux-amd64 -r
+}
+
+# configure the etcd server
+{
+  sudo mkdir -p /etc/etcd /var/lib/etcd
+  sudo cp ca.crt etcd-server.key etcd-server.crt /etc/etcd/
+}
+
+# prepare the etcd service systemd unit file
+
+# substitute the value for <HOSTNAME>
+# e.g. "kthw-play-mastervm01" for mastervm01 with 'kthw' as prefix and 'play' as environmemt
+sed -i "s|<HOSTNAME>|$(hostname -s)|g" etcd.service
+
+# substitute the value for <INTERNAL_IP> by replacing VALUE in the following command:
+# e.g. "10.240.0.11" for mastervm01, "10.240.0.12" for mastervm02 etc.
+sed -i "s|<INTERNAL_IP>|$(hostname -i)|g" etcd.service
+
+# verify the etcd service systemd unit file
+cat etcd.service
+
+# copy the etcd service systemd unit file
+sudo cp etcd.service /etc/systemd/system/etcd.service
+```
+
+### Start the etcd server
+```
+{
+  sudo systemctl daemon-reload
+  sudo systemctl enable etcd
+  sudo systemctl start etcd
+}
+```
+
+### Verify the etcd server
+```
+sudo ETCDCTL_API=3 etcdctl member list \
+  --endpoints=https://127.0.0.1:2379 \
+  --cacert=/etc/etcd/ca.crt \
+  --cert=/etc/etcd/etcd-server.crt \
+  --key=/etc/etcd/etcd-server.key
+
+# output should be something like this
+# ffed16798470cab5, started, kthw-play-mastervm01, https://10.240.0.11:2380, https://10.240.0.11:2379, false
+```
+
+### Create encryption key
+```
+cd ~/kthw-azure-git/scripts/master
+
+# copy the template encryption config yaml file
+cp encryption-config.yaml encryption-config-secret.yaml
+
+# generate openssl encryption config yaml file by substituting encyrption key with random value
+sed -i "s|<ENCRYPTION_KEY>|$(head -c 32 /dev/urandom | base64)|g" encryption-config-secret.yaml
+
 ```

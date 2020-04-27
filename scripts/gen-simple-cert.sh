@@ -1,6 +1,6 @@
 #!/bin/bash
-# $1 = target certificate
-# $2 = ca key
+# $1 = target certificate file name w/o extension
+# $2 = ca key file name w/o extension
 # $3 = subject
 
 # create private key

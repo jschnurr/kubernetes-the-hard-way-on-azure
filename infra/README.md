@@ -37,15 +37,20 @@ git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git ~/kt
 
 # Install remaining pre-requisites as docker image (recommended)
 
-## - Install docker ce:
+## - Install docker ce for Ubuntu 18.04:
 ```
 curl -fsSL "https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:])/gpg" | sudo apt-key add -
 
-sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:]) \
-$(lsb_release -cs | tr -td '\n' | tr [:upper:] [:lower:]) stable"
+echo "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:]) \
+$(lsb_release -cs | tr -td '\n' | tr [:upper:] [:lower:]) stable" | sudo tee -a /etc/apt/sources.list.d/docker.list
 
 sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli
+sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+```
+
+## - Install docker for Ubuntu 20.04:
+```
+sudo apt-get install docker-compose
 ```
 
 ## - Build docker image with the image name as kthw-azure-image
