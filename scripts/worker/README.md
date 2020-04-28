@@ -102,24 +102,24 @@ cd ~/kthw-azure-git/scripts/worker
   certs/kube-proxy
 ```
 
-### Create kubelet kube config file
+### Create bootstrap kube config file for kubelet
 ```
 cd ~/kthw-azure-git/scripts/worker
 
 # generate the kube config file for kubelet service
-.././gen-kubelet-kube-config.sh kubernetes-the-hard-way-azure \
+.././gen-bootstrap-kube-config.sh bootstrap \
   certs/ca \
   https://<PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com:6443 \
-  configs/kubelet \
-  system:node:<PREFIX>-<ENVIRONMENT>-workervm01 \
+  configs/bootstrap-kubeconfig \
+  kubelet-bootstrap \
   $(cat configs/bootstrap-token.yaml | grep -oP "token-id:\s?\K\w+").$(cat configs/bootstrap-token.yaml | grep -oP "token-secret:\s?\K\w+")
 
 # substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-.././gen-kubelet-kube-config.sh kubernetes-the-hard-way-azure \
+.././gen-bootstrap-kube-config.sh bootstrap \
   certs/ca \
   https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443 \
-  configs/kubelet \
-  system:node:kthw-play-workervm01 \
+  configs/bootstrap-kubeconfig \
+  kubelet-bootstrap \
   $(cat configs/bootstrap-token.yaml | grep -oP "token-id:\s?\K\w+").$(cat configs/bootstrap-token.yaml | grep -oP "token-secret:\s?\K\w+")
 ```
 
@@ -267,11 +267,11 @@ logout
 cd ~/kthw-azure-git/scripts/worker
 
 # remote copy to the workervm01
-scp certs/ca.crt configs/kubelet.kubeconfig kubelet-config.yaml kubelet.service \
+scp certs/ca.crt configs/bootstrap-kubeconfig kubelet-config.yaml kubelet.service \
   usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
 
 # substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp certs/ca.crt configs/kubelet.kubeconfig kubelet-config.yaml kubelet.service \
+scp certs/ca.crt configs/bootstrap-kubeconfig kubelet-config.yaml kubelet.service \
   usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
 ```
 
@@ -291,10 +291,10 @@ wget -q --show-progress --https-only --timestamping \
 
 # configure kubelet service
 {
-  sudo mkdir -p /var/lib/kubelet/pki /var/lib/kubernetes
+  sudo mkdir -p /var/lib/kubelet /var/lib/kubernetes
   chmod +x kubelet
   sudo mv kubelet /usr/local/bin/
-  sudo mv kubelet.kubeconfig /var/lib/kubelet/
+  sudo mv bootstrap-kubeconfig /var/lib/kubelet/
   sudo mv ca.crt /var/lib/kubernetes/
 }
 
@@ -303,10 +303,6 @@ wget -q --show-progress --https-only --timestamping \
 # substitute the value for <POD_CIDR>
 # e.g. 10.200.1.0/24 for workervm01, 10.200.2.0/24 for workervm02 etc.
 sed -i 's|<POD_CIDR>|10.200.1.0\/24|g' kubelet-config.yaml
-
-# substitute the value for <HOSTNAME>
-# e.g. "kthw-play-workervm01" for workervm01 with 'kthw' as prefix and 'play' as environmemt
-sed -i "s|<HOSTNAME>|$(hostname -s)|g" kubelet-config.yaml
 
 # verify kubelet config file
 cat kubelet-config.yaml

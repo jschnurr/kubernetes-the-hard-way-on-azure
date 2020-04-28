@@ -4,6 +4,7 @@ metadata:
   name: bootstrap-token-<TOKEN_ID>
   namespace: kube-system
 
+type: bootstrap.kubernetes.io/token
 stringData:
   description: "The bootstrap token."
 

@@ -6,8 +6,8 @@ Requires=containerd.service
 
 [Service]
 ExecStart=/usr/local/bin/kubelet \
-  --bootstrap-kubeconfig=/var/lib/kubelet/kubelet.kubeconfig \
-  --cert-dir=/var/lib/kubelet/pki \
+  --bootstrap-kubeconfig=/var/lib/kubelet/bootstrap-kubeconfig \
+  --cert-dir=/var/lib/kubelet \
   --config=/var/lib/kubelet/kubelet-config.yaml \
   --container-runtime=remote \
   --container-runtime-endpoint=unix:///run/containerd/containerd.sock \
