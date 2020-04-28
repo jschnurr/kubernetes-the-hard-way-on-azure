@@ -1,19 +1,336 @@
-# Install kubernetes in master node
+# Install kubernetes in worker node
 
-## Create and install certificates
+## Create certificates
 ```
 # comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
 sudo sed -i '0,/RANDFILE/{s/^RANDFILE/\#&/}' /etc/ssl/openssl.cnf
 
 # modify user permissions to read, write and execute all shell scripts
 cd ~/kthw-azure-git/scripts
-chmod u=rwx *.sh
+chmod +x *.sh
 
 # create a directory to hold all the generated certificates
 cd ~/kthw-azure-git/scripts/worker
 mkdir certs
+
+# copy ca certs from master
+cd ~/kthw-azure-git/scripts/worker
+cp ../master/certs/ca* certs/
+
+# create a directory to hold all the generated configurations
+cd ~/kthw-azure-git/scripts/worker
+mkdir configs
+
+# copy admin kubeconfig file
+cd ~/kthw-azure-git/scripts/worker
+cp ../master/configs/admin.kubeconfig configs/
 ```
 
-### Create kubelet client certificate
-
 ### Create kube-proxy certificate
+```
+cd ~/kthw-azure-git/scripts/worker
+
+.././gen-simple-cert.sh kube-proxy ca "/CN=system:kube-proxy"
+
+# verify generated certificate
+openssl x509 -text -in certs/kube-proxy.crt
+```
+
+### Create bootstrap token for kubelet
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# copy the template bootstrap token yaml file
+cp bootstrap-token.yaml configs/bootstrap-token.yaml
+
+# substitute the value for <TOKEN_ID> with random 6 character alphanumeric string (0-9a-z)
+sed -i "s|<TOKEN_ID>|$(date +%N%s | sha256sum | head -c 6)|g" configs/bootstrap-token.yaml
+
+# substitute the value for <TOKEN_SECRET> with random 16 character alphanumeric string (0-9a-z)
+sed -i "s|<TOKEN_SECRET>|$(date +%N%s | sha256sum | head -c 16)|g" configs/bootstrap-token.yaml
+
+# verify generated bootstrap token yaml file
+cat configs/bootstrap-token.yaml
+
+# create bootstrap token secret
+kubectl apply -f configs/bootstrap-token.yaml --kubeconfig configs/admin.kubeconfig
+
+```
+
+### Create cluster role binding for kubelet to auto create csr
+```
+cd ~/kthw-azure-git/scripts/worker
+
+kubectl create -f csr-for-bootstrapping.yaml --kubeconfig configs/admin.kubeconfig
+```
+
+### Create cluster role binding for kubelet to auto approve csr
+```
+cd ~/kthw-azure-git/scripts/worker
+
+kubectl create -f auto-approve-csrs-for-group.yaml --kubeconfig configs/admin.kubeconfig
+```
+
+### Create cluster role binding for kubelet to auto renew certificates on expiration
+```
+cd ~/kthw-azure-git/scripts/worker
+
+kubectl create -f auto-approve-renewals-for-nodes.yaml --kubeconfig configs/admin.kubeconfig
+```
+
+
+## Create kubernetes configurations
+
+### Create kube-proxy kube config file
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# generate the kube config file for kube-proxy service
+.././gen-kube-config.sh kubernetes-the-hard-way-azure \
+  certs/ca \
+  https://<PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com:6443 \
+  configs/kube-proxy \
+  system:kube-proxy \
+  certs/kube-proxy
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+.././gen-kube-config.sh kubernetes-the-hard-way-azure \
+  certs/ca \
+  https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443 \
+  configs/kube-proxy \
+  system:kube-proxy \
+  certs/kube-proxy
+```
+
+### Create kubelet kube config file
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# generate the kube config file for kubelet service
+.././gen-kubelet-kube-config.sh kubernetes-the-hard-way-azure \
+  certs/ca \
+  https://<PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com:6443 \
+  configs/kubelet \
+  system:node:<PREFIX>-<ENVIRONMENT>-workervm01 \
+  $(cat configs/bootstrap-token.yaml | grep -oP "token-id:\s?\K\w+").$(cat configs/bootstrap-token.yaml | grep -oP "token-secret:\s?\K\w+")
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+.././gen-kubelet-kube-config.sh kubernetes-the-hard-way-azure \
+  certs/ca \
+  https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443 \
+  configs/kubelet \
+  system:node:kthw-play-workervm01 \
+  $(cat configs/bootstrap-token.yaml | grep -oP "token-id:\s?\K\w+").$(cat configs/bootstrap-token.yaml | grep -oP "token-secret:\s?\K\w+")
+```
+
+## Install worker node pre-requisites
+
+### Remote login to workervm01
+```
+ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+```
+
+### Install socat binary to enable 'kubectl port-forward' command (inside worker node)
+```
+{
+  sudo apt-get update
+  sudo apt-get -y install socat conntrack ipset
+}
+```
+
+### Disable swap (inside worker node)
+```
+# verify if swap is enabled
+sudo swapon --show
+
+# if output is not empty then disable swap
+sudo swapoff -a 
+```
+
+### Download, install and configure cni networking (inside worker node)
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# remote copy to the workervm01
+scp 10-bridge.conf 99-loopback.conf \
+  usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+scp 10-bridge.conf 99-loopback.conf \
+  usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
+
+# remote login to workervm01
+ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+
+cd ~
+
+# substitute the value for <POD_CIDR>
+# e.g. 10.200.1.0/24 for workervm01, 10.200.2.0/24 for workervm02 etc.
+sed -i 's|<POD_CIDR>|10.200.1.0\/24|g' 10-bridge.conf
+
+# download cni plugin v0.8.5
+wget -q --show-progress --https-only --timestamping \
+  "https://github.com/containernetworking/plugins/releases/download/v0.8.5/cni-plugins-linux-amd64-v0.8.5.tgz"
+
+# configure cni plugin
+{
+  sudo mkdir -p \
+    /etc/cni/net.d \
+    /opt/cni/bin
+  sudo tar -xvf cni-plugins-linux-amd64-v0.8.5.tgz -C /opt/cni/bin/
+  rm cni-plugins-linux-amd64-v0.8.5.tgz
+}
+
+# move cni configuration files
+sudo mv 10-bridge.conf 99-loopback.conf /etc/cni/net.d/
+
+```
+
+### Download, install and configure containerd container runtime (inside worker node)
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# remote copy to the workervm01
+scp config.toml containerd.service \
+  usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+scp config.toml containerd.service \
+  usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
+
+# remote login to workervm01
+ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+
+cd ~
+
+# download containerd v1.2.13
+wget -q --show-progress --https-only --timestamping \
+  "https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.18.0/crictl-v1.18.0-linux-amd64.tar.gz" \
+  "https://github.com/opencontainers/runc/releases/download/v1.0.0-rc10/runc.amd64" \
+  "https://github.com/containerd/containerd/releases/download/v1.2.13/containerd-1.2.13.linux-amd64.tar.gz"
+
+# configure containerd
+{
+  sudo mkdir -p /etc/containerd/
+
+  mkdir containerd
+  tar -xvf containerd-1.2.13.linux-amd64.tar.gz -C containerd
+  sudo mv containerd/bin/* /bin/
+
+  tar -xvf crictl-v1.18.0-linux-amd64.tar.gz
+  sudo mv runc.amd64 runc
+  chmod +x crictl runc
+  sudo mv crictl runc /usr/local/bin/
+
+  rm containerd/ -r
+  rm crictl-v1.18.0-linux-amd64.tar.gz containerd-1.2.13.linux-amd64.tar.gz
+}
+
+# move containerd config file
+sudo mv config.toml /etc/containerd/config.toml
+
+# move containerd systemd unit file
+sudo mv containerd.service /etc/systemd/system/containerd.service
+```
+
+### Start containerd service (inside worker node)
+```
+{
+  sudo systemctl daemon-reload
+  sudo systemctl enable containerd
+  sudo systemctl start containerd
+}
+```
+
+### Verify containerd service (inside worker node)
+```
+systemctl status containerd
+
+# remote logout from workervm01
+logout
+```
+
+
+## Install kubernetes kubelet
+
+### Remote copy files to worker node
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# remote copy to the workervm01
+scp certs/ca.crt configs/kubelet.kubeconfig kubelet-config.yaml kubelet.service \
+  usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+scp certs/ca.crt configs/kubelet.kubeconfig kubelet-config.yaml kubelet.service \
+  usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
+```
+
+### Download, install and configure kubelet service (inside master node)
+```
+# remote login to workervm01
+ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+
+cd ~
+
+# download kubelet v1.18.1
+wget -q --show-progress --https-only --timestamping \
+  "https://storage.googleapis.com/kubernetes-release/release/v1.18.1/bin/linux/amd64/kubelet"
+
+# configure kubelet service
+{
+  sudo mkdir -p /var/lib/kubelet/pki /var/lib/kubernetes
+  chmod +x kubelet
+  sudo mv kubelet /usr/local/bin/
+  sudo mv kubelet.kubeconfig /var/lib/kubelet/
+  sudo mv ca.crt /var/lib/kubernetes/
+}
+
+# prepare kubelet config file
+
+# substitute the value for <POD_CIDR>
+# e.g. 10.200.1.0/24 for workervm01, 10.200.2.0/24 for workervm02 etc.
+sed -i 's|<POD_CIDR>|10.200.1.0\/24|g' kubelet-config.yaml
+
+# substitute the value for <HOSTNAME>
+# e.g. "kthw-play-workervm01" for workervm01 with 'kthw' as prefix and 'play' as environmemt
+sed -i "s|<HOSTNAME>|$(hostname -s)|g" kubelet-config.yaml
+
+# verify kubelet config file
+cat kubelet-config.yaml
+
+# move kubelet config file
+sudo mv kubelet-config.yaml /var/lib/kubelet/kubelet-config.yaml
+
+# move kubelet systemd unit file
+sudo mv kubelet.service /etc/systemd/system/kubelet.service
+```
+
+### Start kubelet service (inside master node)
+```
+{
+  sudo systemctl daemon-reload
+  sudo systemctl enable kubelet
+  sudo systemctl start kubelet
+}
+```
+
+### Verify kube-scheduler service (inside master node)
+```
+systemctl status kubelet
+
+# remote logout from mastervm01
+logout
+```

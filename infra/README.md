@@ -41,12 +41,12 @@ git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git ~/kt
 
 ## - Install docker ce for Ubuntu 18.04:
 ```
-curl -fsSL "https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:])/gpg" | sudo apt-key add -
-
-echo "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:]) \
-$(lsb_release -cs | tr -td '\n' | tr [:upper:] [:lower:]) stable" | sudo tee -a /etc/apt/sources.list.d/docker.list
-
 {
+  curl -fsSL "https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:])/gpg" | sudo apt-key add -
+
+  echo "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:]) \
+  $(lsb_release -cs | tr -td '\n' | tr [:upper:] [:lower:]) stable" | sudo tee -a /etc/apt/sources.list.d/docker.list
+
   sudo apt-get update
   sudo apt-get install -y docker-ce docker-ce-cli containerd.io
 }
@@ -82,9 +82,9 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 
 ## - Install kubectl
 ```
-curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
-echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
 {
+  curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
+  echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
   sudo apt-get update
   sudo apt-get install -y kubectl
 }
@@ -92,10 +92,12 @@ echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/
 
 ## - Install terraform
 ```
-wget https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip
-unzip terraform_0.12.24_linux_amd64.zip
-sudo mv terraform /usr/local/bin/
-rm terraform_0.12.24_linux_amd64.zip
+{
+  wget https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linux_amd64.zip
+  unzip terraform_0.12.24_linux_amd64.zip
+  sudo mv terraform /usr/local/bin/
+  rm terraform_0.12.24_linux_amd64.zip
+}
 ```
 
 ## - Verify terraform installation
