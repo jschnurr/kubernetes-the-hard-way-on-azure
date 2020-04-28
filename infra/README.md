@@ -7,8 +7,10 @@ cd ~
 
 ## - Update and upgrade apt packages:
 ```
-sudo apt-get update
-sudo apt-get full-upgrade -y
+{
+  sudo apt-get update
+  sudo apt-get full-upgrade -y
+}
 ```
 
 ## - Install basic prereuisites:
@@ -44,8 +46,10 @@ curl -fsSL "https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | 
 echo "deb [arch=amd64] https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:]) \
 $(lsb_release -cs | tr -td '\n' | tr [:upper:] [:lower:]) stable" | sudo tee -a /etc/apt/sources.list.d/docker.list
 
-sudo apt-get update
-sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+{
+  sudo apt-get update
+  sudo apt-get install -y docker-ce docker-ce-cli containerd.io
+}
 ```
 
 ## - Install docker for Ubuntu 20.04:
@@ -80,8 +84,10 @@ curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
 curl -s https://packages.cloud.google.com/apt/doc/apt-key.gpg | sudo apt-key add -
 echo "deb https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee -a /etc/apt/sources.list.d/kubernetes.list
-apt-get update
-apt-get install -y kubectl
+{
+  sudo apt-get update
+  sudo apt-get install -y kubectl
+}
 ```
 
 ## - Install terraform

@@ -6,12 +6,12 @@ Documentation=https://github.com/etcd-io/etcd
 Type=notify
 ExecStart=/usr/local/bin/etcd \
   --name <HOSTNAME> \
-  --cert-file=/etc/etcd/etcd-server.crt \
-  --key-file=/etc/etcd/etcd-server.key \
-  --peer-cert-file=/etc/etcd/etcd-server.crt \
-  --peer-key-file=/etc/etcd/etcd-server.key \
-  --trusted-ca-file=/etc/etcd/ca.crt \
-  --peer-trusted-ca-file=/etc/etcd/ca.crt \
+  --cert-file /etc/etcd/etcd-server.crt \
+  --key-file /etc/etcd/etcd-server.key \
+  --peer-cert-file /etc/etcd/etcd-server.crt \
+  --peer-key-file /etc/etcd/etcd-server.key \
+  --trusted-ca-file /etc/etcd/ca.crt \
+  --peer-trusted-ca-file /etc/etcd/ca.crt \
   --peer-client-cert-auth \
   --client-cert-auth \
   --initial-advertise-peer-urls https://<INTERNAL_IP>:2380 \
@@ -21,7 +21,7 @@ ExecStart=/usr/local/bin/etcd \
   --initial-cluster-token etcd-cluster-0 \
   --initial-cluster <HOSTNAME>=https://<INTERNAL_IP>:2380 \
   --initial-cluster-state new \
-  --data-dir=/var/lib/etcd
+  --data-dir /var/lib/etcd
 Restart=on-failure
 RestartSec=5
 
