@@ -123,6 +123,7 @@ cd ~/kthw-azure-git/scripts/worker
   $(cat configs/bootstrap-token.yaml | grep -oP "token-id:\s?\K\w+").$(cat configs/bootstrap-token.yaml | grep -oP "token-secret:\s?\K\w+")
 ```
 
+
 ## Install worker node pre-requisites
 
 ### Remote login to workervm01
@@ -170,6 +171,8 @@ ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
 
 cd ~
 
+# prepare cni configuration files
+
 # substitute the value for <POD_CIDR>
 # e.g. 10.200.1.0/24 for workervm01, 10.200.2.0/24 for workervm02 etc.
 sed -i 's|<POD_CIDR>|10.200.1.0\/24|g' 10-bridge.conf
@@ -189,7 +192,6 @@ wget -q --show-progress --https-only --timestamping \
 
 # move cni configuration files
 sudo mv 10-bridge.conf 99-loopback.conf /etc/cni/net.d/
-
 ```
 
 ### Download, install and configure containerd container runtime (inside worker node)
@@ -254,6 +256,7 @@ sudo mv containerd.service /etc/systemd/system/containerd.service
 ### Verify containerd service (inside worker node)
 ```
 systemctl status containerd
+journalctl -e -u containerd
 
 # remote logout from workervm01
 logout
@@ -275,7 +278,7 @@ scp certs/ca.crt configs/bootstrap-kubeconfig kubelet-config.yaml kubelet.servic
   usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
 ```
 
-### Download, install and configure kubelet service (inside master node)
+### Download, install and configure kubelet service (inside worker node)
 ```
 # remote login to workervm01
 ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
@@ -314,7 +317,7 @@ sudo mv kubelet-config.yaml /var/lib/kubelet/kubelet-config.yaml
 sudo mv kubelet.service /etc/systemd/system/kubelet.service
 ```
 
-### Start kubelet service (inside master node)
+### Start kubelet service (inside worker node)
 ```
 {
   sudo systemctl daemon-reload
@@ -323,10 +326,94 @@ sudo mv kubelet.service /etc/systemd/system/kubelet.service
 }
 ```
 
-### Verify kube-scheduler service (inside master node)
+### Verify kubelet service (inside worker node)
 ```
 systemctl status kubelet
+journalctl -e -u kubelet
 
-# remote logout from mastervm01
+# remote logout from workervm01
 logout
+```
+
+
+## Install kubernetes kube-proxy
+
+### Remote copy files to worker node
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# remote copy to the workervm01
+scp configs/kube-proxy.kubeconfig kube-proxy-config.yaml kube-proxy.service \
+  usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+scp configs/kube-proxy.kubeconfig kube-proxy-config.yaml kube-proxy.service \
+  usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
+```
+
+### Download, install and configure kube-proxy service (inside worker node)
+```
+# remote login to workervm01
+ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
+
+# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
+ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+
+cd ~
+
+# download kube-proxy v1.18.1
+wget -q --show-progress --https-only --timestamping \
+  "https://storage.googleapis.com/kubernetes-release/release/v1.18.1/bin/linux/amd64/kube-proxy"
+
+# configure kube-proxy service
+{
+  sudo mkdir -p /var/lib/kube-proxy
+  chmod +x kube-proxy
+  sudo mv kube-proxy /usr/local/bin/
+  sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
+}
+
+# prepare kube-proxy config file
+
+# substitute the value for <CLUSTER_CIDR>
+sed -i 's|<CLUSTER_CIDR>|10.200.0.0\/16|g' kube-proxy-config.yaml
+
+# verify kube-proxy config file
+cat kube-proxy-config.yaml
+
+# move kube-proxy config file
+sudo mv kube-proxy-config.yaml /var/lib/kube-proxy/kube-proxy-config.yaml
+
+# move kube-proxy systemd unit file
+sudo mv kube-proxy.service /etc/systemd/system/kube-proxy.service
+```
+
+### Start kube-proxy service (inside worker node)
+```
+{
+  sudo systemctl daemon-reload
+  sudo systemctl enable kube-proxy
+  sudo systemctl start kube-proxy
+}
+```
+
+### Verify kube-proxy service (inside worker node)
+```
+systemctl status kube-proxy
+journalctl -e -u kube-proxy
+
+# remote logout from workervm01
+logout
+```
+
+
+## Verification of worker node setup after everything
+```
+cd ~/kthw-azure-git/scripts/worker
+
+kubectl get nodes --kubeconfig configs/admin.kubeconfig
+
+# output should be something like this
+NAME                   STATUS   ROLES    AGE   VERSION
+kthw-play-workervm01   Ready    <none>   10m   v1.18.1
 ```

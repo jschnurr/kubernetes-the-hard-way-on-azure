@@ -251,6 +251,7 @@ ffed16798470cab5, started, kthw-play-mastervm01, https://10.240.0.11:2380, https
 
 # if not then check the service status
 systemctl status etcd
+journalctl -e -u etcd
 
 # remote logout from mastervm01
 logout
@@ -335,6 +336,7 @@ sudo mv kube-apiserver.service /etc/systemd/system/kube-apiserver.service
 ### Verify kube-apiserver service (inside master node)
 ```
 systemctl status kube-apiserver
+journalctl -e -u kube-apiserver
 
 # remote logout from mastervm01
 logout
@@ -393,6 +395,7 @@ sudo mv kube-scheduler.service /etc/systemd/system/kube-scheduler.service
 ### Verify kube-scheduler service (inside master node)
 ```
 systemctl status kube-scheduler
+journalctl -e -u kube-scheduler
 
 # remote logout from mastervm01
 logout
@@ -451,6 +454,7 @@ sudo mv kube-controller-manager.service /etc/systemd/system/kube-controller-mana
 ### Verify kube-controller-manager service (inside master node)
 ```
 systemctl status kube-controller-manager
+journalctl -e -u kube-controller-manager
 
 # remote logout from mastervm01
 logout
@@ -520,6 +524,7 @@ X-Content-Type-Options: nosniff
 
 # if not then check the service status
 systemctl status nginx
+journalctl -e -u nginx
 
 # remote logout from mastervm01
 logout
