@@ -335,6 +335,17 @@ journalctl -e -u kubelet
 logout
 ```
 
+### Approve certificate signing request (csr) of worker node
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# get the csr name
+kubectl get csr --kubeconfig configs/admin.kubeconfig
+
+# approve the csr by substituting the 'Name' as <CSR_NAME> from the output of previous command
+kubectl certificate approve <CSR_NAME>
+```
+
 
 ## Install kubernetes kube-proxy
 

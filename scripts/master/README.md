@@ -551,6 +551,14 @@ terraform apply -var-file=azurerm-secret.tfvars -var="enable_health_probe=true"
 ```
 
 
+## Add kube-apiserver user to kubelet-api-admin role for exec and port-forward operation access
+```
+cd ~/kthw-azure-git/scripts/master
+
+kubectl apply -f kube-apiserver-kubelet-api-admin-binding.yaml --kubeconfig configs/admin.kubeconfig
+```
+
+
 ## Verification of master node setup after everything
 ```
 cd ~/kthw-azure-git/scripts/master
