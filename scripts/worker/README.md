@@ -148,7 +148,10 @@ ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
 sudo swapon --show
 
 # if output is not empty then disable swap
-sudo swapoff -a 
+sudo swapoff -a
+
+# remote logout from workervm01
+logout
 ```
 
 ### Download, install and configure cni networking (inside worker node)
@@ -171,12 +174,6 @@ ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
 
 cd ~
 
-# prepare cni configuration files
-
-# substitute the value for <POD_CIDR>
-# e.g. 10.200.1.0/24 for workervm01, 10.200.2.0/24 for workervm02 etc.
-sed -i 's|<POD_CIDR>|10.200.1.0\/24|g' 10-bridge.conf
-
 # download cni plugin v0.8.5
 wget -q --show-progress --https-only --timestamping \
   "https://github.com/containernetworking/plugins/releases/download/v0.8.5/cni-plugins-linux-amd64-v0.8.5.tgz"
@@ -190,8 +187,20 @@ wget -q --show-progress --https-only --timestamping \
   rm cni-plugins-linux-amd64-v0.8.5.tgz
 }
 
+# prepare cni configuration files
+
+# substitute the value for <POD_CIDR>
+# e.g. 10.200.1.0/24 for workervm01, 10.200.2.0/24 for workervm02 etc.
+sed -i 's|<POD_CIDR>|10.200.1.0\/24|g' 10-bridge.conf
+
+# verify cni configuration file
+cat 10-bridge.conf
+
 # move cni configuration files
 sudo mv 10-bridge.conf 99-loopback.conf /etc/cni/net.d/
+
+# remote logout from workervm01
+logout
 ```
 
 ### Download, install and configure containerd container runtime (inside worker node)
@@ -342,8 +351,8 @@ cd ~/kthw-azure-git/scripts/worker
 # get the csr name
 kubectl get csr --kubeconfig configs/admin.kubeconfig
 
-# approve the csr by substituting the 'Name' as <CSR_NAME> from the output of previous command
-kubectl certificate approve <CSR_NAME>
+# approve the csr by substituting the value under 'Name' as <CSR_NAME> from the output of previous command having condition as Pending
+kubectl certificate approve <CSR_NAME> --kubeconfig configs/admin.kubeconfig
 ```
 
 

@@ -555,7 +555,7 @@ terraform apply -var-file=azurerm-secret.tfvars -var="enable_health_probe=true"
 ```
 cd ~/kthw-azure-git/scripts/master
 
-kubectl apply -f kube-apiserver-kubelet-api-admin-binding.yaml --kubeconfig configs/admin.kubeconfig
+kubectl apply -f kube-apiserver-cluster-admin-binding.yaml --kubeconfig configs/admin.kubeconfig
 ```
 
 
