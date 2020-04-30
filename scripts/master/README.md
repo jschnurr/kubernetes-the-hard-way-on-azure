@@ -342,6 +342,13 @@ journalctl -e -u kube-apiserver
 logout
 ```
 
+### Add kube-apiserver user to system:kube-apiserver-to-kubelet role (new) for exec and port-forward operation access
+```
+cd ~/kthw-azure-git/scripts/master
+
+kubectl apply -f kube-apiserver-to-kubelet.yaml --kubeconfig configs/admin.kubeconfig
+```
+
 
 ## Install kubernetes scheduler
 
@@ -548,14 +555,6 @@ etcd-0               Healthy   {"health":"true"}
 cd ~/kthw-azure-git/infra
 
 terraform apply -var-file=azurerm-secret.tfvars -var="enable_health_probe=true"
-```
-
-
-## Add kube-apiserver user to cluster-admin role for exec and port-forward operation access
-```
-cd ~/kthw-azure-git/scripts/master
-
-kubectl apply -f kube-apiserver-cluster-admin-binding.yaml --kubeconfig configs/admin.kubeconfig
 ```
 
 
