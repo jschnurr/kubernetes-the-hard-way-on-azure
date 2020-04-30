@@ -50,6 +50,10 @@ variable "enable_health_probe" {
   type    = bool
   default = false
 }
+variable "enable_master_setup" {
+  type    = bool
+  default = false
+}
 variable "master_disk_size" {
   type    = number
   default = 32
@@ -512,4 +516,13 @@ resource "azurerm_lb_rule" "lbr01noprobe" {
 
   # un-attach health probe
   count = var.enable_health_probe ? 0 : 1
+}
+
+resource "null_resource" "setupmasternodes" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    command = "../scripts/setup-master-nodes.sh ${var.master_vm_count}"
+  }
+
+  count = var.enable_master_setup ? 1 : 0
 }
