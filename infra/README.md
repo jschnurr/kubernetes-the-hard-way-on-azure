@@ -1,6 +1,16 @@
 # Install basic and docker pre-requisites
 
-## - Change directory to home
+## - Choose the running platform
+For Windows 10, there are 2 options:
+1. Windows Subsystem for Linux (WSL)*: https://docs.microsoft.com/en-us/windows/wsl/install-win10  
+2. Or, WSL2*: https://docs.microsoft.com/en-us/windows/wsl/wsl2-install  
+*choose Ubuntu 18.04 LTS distro either way
+
+For Linux, there are 2 options:
+1. Ubuntu 18.04.4 LTS (Bionic Beaver): https://releases.ubuntu.com/18.04.4/  
+2. Or, Ubuntu 20.04 LTS (Focal Fossa): https://releases.ubuntu.com/20.04/  
+
+## - Change directory to home in bash terminal
 ```
 cd ~
 ```
@@ -39,7 +49,17 @@ git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git ~/kt
 
 # Install remaining pre-requisites as docker image (recommended)
 
-## - Install docker ce for Ubuntu 18.04:
+## - Install docker ce on WSL:
+1. Install Docker for Windows: https://docs.docker.com/docker-for-windows/install  
+2. Enable docker integration in WSL:  
+a. https://docs.microsoft.com/en-us/virtualization/community/team-blog/2017/20171208-wsl-interoperability-with-docker  
+b. Or, https://nickjanetakis.com/blog/setting-up-docker-for-windows-and-wsl-to-work-flawlessly
+
+## - Install docker ce on WSL2:
+1. Install Docker for Windows: https://docs.docker.com/docker-for-windows/install  
+2. Enable docker integration in WSL2: https://code.visualstudio.com/blogs/2020/03/02/docker-in-wsl2
+
+## - Install docker ce on Ubuntu 18.04:
 ```
 {
   curl -fsSL "https://download.docker.com/linux/$(lsb_release -is | tr -td '\n' | tr [:upper:] [:lower:])/gpg" | sudo apt-key add -
@@ -52,7 +72,7 @@ git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git ~/kt
 }
 ```
 
-## - Install docker for Ubuntu 20.04:
+## - Install docker on Ubuntu 20.04:
 ```
 sudo apt-get install docker-compose
 ```

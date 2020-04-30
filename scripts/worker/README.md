@@ -393,14 +393,6 @@ wget -q --show-progress --https-only --timestamping \
   sudo mv kube-proxy.kubeconfig /var/lib/kube-proxy/kubeconfig
 }
 
-# prepare kube-proxy config file
-
-# substitute the value for <CLUSTER_CIDR>
-sed -i 's|<CLUSTER_CIDR>|10.200.0.0\/16|g' kube-proxy-config.yaml
-
-# verify kube-proxy config file
-cat kube-proxy-config.yaml
-
 # move kube-proxy config file
 sudo mv kube-proxy-config.yaml /var/lib/kube-proxy/kube-proxy-config.yaml
 
