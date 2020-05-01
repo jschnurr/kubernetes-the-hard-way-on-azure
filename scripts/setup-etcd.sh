@@ -7,6 +7,7 @@
 cd ~
 
 # prepare etcd service systemd unit file
+echo "Started preparation of etcd service"
 
 # substitute the value for <HOSTNAME>
 sed -i "s|<HOSTNAME>|$(hostname -s)|g" etcd.service
@@ -37,20 +38,23 @@ else
 fi
 old_value=$(grep -oP "^\s+--initial-cluster-state\s+\K.*(?=\s+\\\\$)" etcd.service)
 sed -i "s|--initial-cluster-state $old_value|--initial-cluster-state $new_value|g" etcd.service
-
-# move etcd service systemd unit file
-sudo mv etcd.service /etc/systemd/system/etcd.service
+echo "Completed preparation of etcd service"
 
 # if etcd service is already installed
-if systemctl list-unit-files | grep -q "^etcd.service";
+if systemctl list-unit-files | grep -q "^etcd.service"
 then
+  echo "Found etcd as already installed"
   # remove files copied already from remote
   rm ca.crt etcd-server.crt etcd-server.key
+
+  # move etcd service systemd unit file
+  sudo mv etcd.service /etc/systemd/system/etcd.service
 
   # if not mastervm01
   if [ $2 -ne 1 ]
   then
     # refresh data on existing members - mastervm02, mastervm03 etc.
+    echo "Started refresh of etcd member data"
 
     # stop etcd server
     {
@@ -66,9 +70,12 @@ then
       sudo systemctl daemon-reload
       sudo systemctl restart etcd
     }
+    echo "Completed refresh of etcd member data"
+
   # if mastervm01
   else
     # add existing members - mastervm02, mastervm03 etc. to initial cluster on mastervm01
+    echo "Started addition of etcd members"
 
     # restart etcd server
     {
@@ -78,16 +85,69 @@ then
 
     for (( i=2; i<=$1; i++ ))
     do
-      sudo ETCDCTL_API=3 etcdctl member add \
-        kthw-play-mastervm0$i --peer-urls=https://10.240.0.1$i:2380 \
-        --endpoints=https://127.0.0.1:2379 \
-        --cacert=/etc/etcd/ca.crt \
-        --cert=/etc/etcd/etcd-server.crt \
-        --key=/etc/etcd/etcd-server.key
+      # check for mastervm in the member list
+      echo "Started checking of etcd member - $3-$4-mastervm0$i"
+      member=$(sudo ETCDCTL_API=3 etcdctl member list \
+          --endpoints=https://127.0.0.1:2379 \
+          --cacert=/etc/etcd/ca.crt \
+          --cert=/etc/etcd/etcd-server.crt \
+          --key=/etc/etcd/etcd-server.key \
+        | grep -oP "^.*mastervm0$i")
+      
+      # if mastervm exists in the member list
+      if [ ! -z "$member" ]
+      then
+        # collect the member id and status
+        member_id=$(echo $member | grep -oP "^\w+")
+        member_status=$(echo $member | grep -oP "^$member_id,\s\K\w+")
+
+        echo "Found existing etcd member - mastervm0$i in $member_status status"
+
+        # if member is not in started status
+        if [ "$member_status" != "started" ]
+        then
+          # remove the mastervm from the member list
+          echo "Removing existing etcd member - $3-$4-mastervm0$i"
+          sudo ETCDCTL_API=3 etcdctl member remove \
+            $member_id \
+            --endpoints=https://127.0.0.1:2379 \
+            --cacert=/etc/etcd/ca.crt \
+            --cert=/etc/etcd/etcd-server.crt \
+            --key=/etc/etcd/etcd-server.key
+
+          # add mastervm to the member list again
+          echo "Adding existing etcd member - $3-$4-mastervm0$i"
+          sudo ETCDCTL_API=3 etcdctl member add \
+            kthw-play-mastervm0$i --peer-urls=https://10.240.0.1$i:2380 \
+            --endpoints=https://127.0.0.1:2379 \
+            --cacert=/etc/etcd/ca.crt \
+            --cert=/etc/etcd/etcd-server.crt \
+            --key=/etc/etcd/etcd-server.key
+          
+          sleep 5
+        fi
+      else
+        echo "Not found etcd member - $3-$4-mastervm0$i"
+
+        # add mastervm to the member list for the first time
+        echo "Adding existing etcd member - $3-$4-mastervm0$i"
+        sudo ETCDCTL_API=3 etcdctl member add \
+          kthw-play-mastervm0$i --peer-urls=https://10.240.0.1$i:2380 \
+          --endpoints=https://127.0.0.1:2379 \
+          --cacert=/etc/etcd/ca.crt \
+          --cert=/etc/etcd/etcd-server.crt \
+          --key=/etc/etcd/etcd-server.key
+        
+        sleep 5
+      fi
     done
+    echo "Completed addition of etcd members"
   fi
 else
-  # download etcd v3.4.7 
+  echo "Not found etcd as installed"
+
+  # download etcd v3.4.7
+  echo "Started installation of etcd"
   wget -q --show-progress --https-only --timestamping \
     "https://github.com/etcd-io/etcd/releases/download/v3.4.7/etcd-v3.4.7-linux-amd64.tar.gz"
 
@@ -105,17 +165,25 @@ else
     sudo mv ca.crt etcd-server.crt etcd-server.key /etc/etcd/
   }
 
+  # move etcd service systemd unit file
+  sudo mv etcd.service /etc/systemd/system/etcd.service
+
   # start etcd server
   {
     sudo systemctl daemon-reload
     sudo systemctl enable etcd
     sudo systemctl start etcd
   }
+  echo "Completed installation of etcd"
 fi
 
-# verify etcd server
-sudo ETCDCTL_API=3 etcdctl member list \
-  --endpoints=https://127.0.0.1:2379 \
-  --cacert=/etc/etcd/ca.crt \
-  --cert=/etc/etcd/etcd-server.crt \
-  --key=/etc/etcd/etcd-server.key
+if [ $2 -eq 1 ]
+then
+  # verify etcd server on mastervm01
+  echo "Displaying etcd member list"
+  sudo ETCDCTL_API=3 etcdctl member list \
+    --endpoints=https://127.0.0.1:2379 \
+    --cacert=/etc/etcd/ca.crt \
+    --cert=/etc/etcd/etcd-server.crt \
+    --key=/etc/etcd/etcd-server.key
+fi
