@@ -518,7 +518,7 @@ resource "azurerm_lb_rule" "lbr01noprobe" {
   count = var.enable_health_probe ? 0 : 1
 }
 
-resource "null_resource" "setupmasternodes" {
+resource "null_resource" "setup_master_nodes" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
     command     = "../scripts/setup-master-nodes.sh ${var.master_vm_count}"
@@ -526,4 +526,14 @@ resource "null_resource" "setupmasternodes" {
 
   count      = var.enable_master_setup ? 1 : 0
   depends_on = [azurerm_linux_virtual_machine.mastervm]
+}
+
+resource "null_resource" "setup_health_check_endpoint" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    command     = "../scripts/setup-health-check-endpoint.sh ${var.master_vm_count}"
+  }
+
+  count      = var.enable_health_probe ? 1 : 0
+  depends_on = [azu.azurerm_lb_rule.lbr01]
 }

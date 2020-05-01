@@ -456,8 +456,8 @@ cd ~
 ### Start nginx service (inside master node)
 ```
 {
-  sudo systemctl restart nginx
   sudo systemctl enable nginx
+  sudo systemctl restart nginx
 }
 ```
 
