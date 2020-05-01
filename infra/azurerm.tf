@@ -34,6 +34,10 @@ variable "master_vm_count" {
   #   error_message = "The master vm count must be in the range - 1 to 5."
   # }
 }
+variable "master_disk_size_gb" {
+  type    = number
+  default = 32
+}
 variable "worker_vm_size" {
   default = "Standard_B1ms"
 }
@@ -46,6 +50,10 @@ variable "worker_vm_count" {
   #   error_message = "The worker vm count must be in the range - 1 to 9."
   # }
 }
+variable "worker_disk_size_gb" {
+  type    = number
+  default = 32
+}
 variable "enable_health_probe" {
   type    = bool
   default = false
@@ -53,14 +61,6 @@ variable "enable_health_probe" {
 variable "enable_master_setup" {
   type    = bool
   default = false
-}
-variable "master_disk_size" {
-  type    = number
-  default = 32
-}
-variable "worker_disk_size" {
-  type    = number
-  default = 32
 }
 
 
@@ -338,7 +338,7 @@ resource "azurerm_linux_virtual_machine" "mastervm" {
     name                 = "${var.prefix}-${var.environment}-masterdisk0${count.index + 1}"
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
-    disk_size_gb         = var.master_disk_size
+    disk_size_gb         = var.master_disk_size_gb
   }
 
   admin_ssh_key {
@@ -411,7 +411,7 @@ resource "azurerm_linux_virtual_machine" "workervm" {
     name                 = "${var.prefix}-${var.environment}-workerdisk0${count.index + 1}"
     caching              = "ReadWrite"
     storage_account_type = "StandardSSD_LRS"
-    disk_size_gb         = var.worker_disk_size
+    disk_size_gb         = var.worker_disk_size_gb
   }
 
   admin_ssh_key {

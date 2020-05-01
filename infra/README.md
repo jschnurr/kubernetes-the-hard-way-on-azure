@@ -88,6 +88,8 @@ docker build -t kthw-azure-image .
 docker run -it --rm --name=kthw-azure-container --mount type=bind,source=$HOME/kthw-azure-git,target=/root/kthw-azure-git kthw-azure-image bash
 ```
 
+---
+
 # Or, install remaining pre-requisites directly on host (not recommended)
 
 ## - Change directory to home
@@ -191,7 +193,7 @@ sed -i 's/<PREFIX>/VALUE/g' azurerm-secret.tfvars
 sed -i 's/<MASTER_VM_SIZE>/VALUE/g' azurerm-secret.tfvars
 
 # substitute the value for <MASTER_VM_COUNT> by replacing VALUE in the following command:
-# VALUE e.g. 1 or 2 etc.
+# VALUE e.g. 1 or 2 etc. upto a maximum of 5
 sed -i 's/<MASTER_VM_COUNT>/VALUE/g' azurerm-secret.tfvars
 
 # substitute the value for <WORKER_VM_SIZE> by replacing VALUE in the following command:
@@ -199,5 +201,5 @@ sed -i 's/<MASTER_VM_COUNT>/VALUE/g' azurerm-secret.tfvars
 sed -i 's/<WORKER_VM_SIZE>/VALUE/g' azurerm-secret.tfvars
 
 # substitute the value for <WORKER_VM_COUNT> by replacing VALUE in the following command:
-# VALUE e.g. 1 or 2 etc.
+# VALUE e.g. 1 or 2 etc. upto a maximum of 9
 sed -i 's/<WORKER_VM_COUNT>/VALUE/g' azurerm-secret.tfvars
