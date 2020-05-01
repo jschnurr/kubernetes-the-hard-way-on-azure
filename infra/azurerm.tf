@@ -521,8 +521,9 @@ resource "azurerm_lb_rule" "lbr01noprobe" {
 resource "null_resource" "setupmasternodes" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command = "../scripts/setup-master-nodes.sh ${var.master_vm_count}"
+    command     = "../scripts/setup-master-nodes.sh ${var.master_vm_count}"
   }
 
-  count = var.enable_master_setup ? 1 : 0
+  count      = var.enable_master_setup ? 1 : 0
+  depends_on = [azurerm_linux_virtual_machine.mastervm]
 }
