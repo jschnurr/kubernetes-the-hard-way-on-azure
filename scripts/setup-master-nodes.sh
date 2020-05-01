@@ -102,6 +102,7 @@ do
 done
 echo "Completed setting up of kubernetes controller manager"
 
+
 # verify master nodes setup after everything
 echo -e "\nDisplaying 'kubectl get componentstatuses' output"
 kubectl get componentstatuses --kubeconfig configs/admin.kubeconfig

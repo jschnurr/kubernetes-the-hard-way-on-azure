@@ -14,3 +14,4 @@ worker_vm_count=<WORKER_VM_COUNT>
 worker_disk_size_gb=32
 enable_health_probe=false
 enable_master_setup=false
+enable_worker_setup=false

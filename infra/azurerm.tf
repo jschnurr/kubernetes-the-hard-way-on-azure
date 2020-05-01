@@ -62,6 +62,10 @@ variable "enable_master_setup" {
   type    = bool
   default = false
 }
+variable "enable_worker_setup" {
+  type    = bool
+  default = false
+}
 
 
 # initialise azure resource manager provider
@@ -535,5 +539,15 @@ resource "null_resource" "setup_health_check_endpoint" {
   }
 
   count      = var.enable_health_probe ? 1 : 0
-  depends_on = [azu.azurerm_lb_rule.lbr01]
+  depends_on = [azurerm_lb_rule.lbr01, null_resource.setup_master_nodes]
+}
+
+resource "null_resource" "setup_worker_nodes" {
+  provisioner "local-exec" {
+    interpreter = ["bash", "-c"]
+    command     = "../scripts/setup-worker-nodes.sh ${var.worker_vm_count}"
+  }
+
+  count      = var.enable_worker_setup ? 1 : 0
+  depends_on = [azurerm_linux_virtual_machine.workervm, null_resource.setup_master_nodes, null_resource.setup_health_check_endpoint]
 }

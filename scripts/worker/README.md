@@ -65,7 +65,6 @@ cat configs/bootstrap-token.yaml
 
 # create bootstrap token secret
 kubectl apply -f configs/bootstrap-token.yaml --kubeconfig configs/admin.kubeconfig
-
 ```
 
 ### Create cluster role binding for kubelet to auto create csr
