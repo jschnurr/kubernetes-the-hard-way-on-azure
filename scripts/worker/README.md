@@ -1,5 +1,16 @@
 # Install kubernetes in worker node
 
+## Initialisation
+```
+cd ~/kthw-azure-git/infra
+
+# initialise variables set for the infrastructure
+source azurerm-secret.tfvars
+
+# determine location code from location
+location_code=$(az account list-locations --query "[?displayName=='$location']".{Code:name} -o tsv)
+```
+
 ## Create certificates
 ```
 # comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
@@ -88,15 +99,7 @@ cd ~/kthw-azure-git/scripts/worker
 # generate the kube config file for kube-proxy service
 .././gen-kube-config.sh kubernetes-the-hard-way-azure \
   certs/ca \
-  https://<PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com:6443 \
-  configs/kube-proxy \
-  system:kube-proxy \
-  certs/kube-proxy
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-.././gen-kube-config.sh kubernetes-the-hard-way-azure \
-  certs/ca \
-  https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443 \
+  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
   configs/kube-proxy \
   system:kube-proxy \
   certs/kube-proxy
@@ -109,15 +112,7 @@ cd ~/kthw-azure-git/scripts/worker
 # generate the kube config file for kubelet service
 .././gen-bootstrap-kube-config.sh bootstrap \
   certs/ca \
-  https://<PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com:6443 \
-  configs/bootstrap-kubeconfig \
-  kubelet-bootstrap \
-  $(cat configs/bootstrap-token.yaml | grep -oP "token-id:\s?\K\w+").$(cat configs/bootstrap-token.yaml | grep -oP "token-secret:\s?\K\w+")
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-.././gen-bootstrap-kube-config.sh bootstrap \
-  certs/ca \
-  https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443 \
+  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
   configs/bootstrap-kubeconfig \
   kubelet-bootstrap \
   $(cat configs/bootstrap-token.yaml | grep -oP "token-id:\s?\K\w+").$(cat configs/bootstrap-token.yaml | grep -oP "token-secret:\s?\K\w+")
@@ -128,10 +123,7 @@ cd ~/kthw-azure-git/scripts/worker
 
 ### Remote login to workervm01
 ```
-ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com
 ```
 
 ### Install socat binary to enable 'kubectl port-forward' command (inside worker node)
@@ -160,17 +152,10 @@ cd ~/kthw-azure-git/scripts/worker
 
 # remote copy to the workervm01
 scp 10-bridge.conf 99-loopback.conf \
-  usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp 10-bridge.conf 99-loopback.conf \
-  usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com:~
 
 # remote login to workervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
@@ -209,17 +194,10 @@ cd ~/kthw-azure-git/scripts/worker
 
 # remote copy to the workervm01
 scp config.toml containerd.service \
-  usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp config.toml containerd.service \
-  usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com:~
 
 # remote login to workervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
@@ -280,20 +258,13 @@ cd ~/kthw-azure-git/scripts/worker
 
 # remote copy to the workervm01
 scp certs/ca.crt configs/bootstrap-kubeconfig kubelet-config.yaml kubelet.service \
-  usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp certs/ca.crt configs/bootstrap-kubeconfig kubelet-config.yaml kubelet.service \
-  usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com:~
 ```
 
 ### Download, install and configure kubelet service (inside worker node)
 ```
 # remote login to workervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
@@ -364,20 +335,13 @@ cd ~/kthw-azure-git/scripts/worker
 
 # remote copy to the workervm01
 scp configs/kube-proxy.kubeconfig kube-proxy-config.yaml kube-proxy.service \
-  usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp configs/kube-proxy.kubeconfig kube-proxy-config.yaml kube-proxy.service \
-  usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com:~
 ```
 
 ### Download, install and configure kube-proxy service (inside worker node)
 ```
 # remote login to workervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-workervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-workervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
