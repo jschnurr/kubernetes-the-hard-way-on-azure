@@ -122,3 +122,8 @@ echo "Completed setting up of kubernetes kube-proxy"
 # verify worker nodes setup after everything
 echo -e "\nDisplaying 'kubectl get nodes' output"
 kubectl get nodes --kubeconfig configs/admin.kubeconfig
+
+# install coredns
+echo -e "\nTriggering installation of coredns"
+cd ../../infra
+../scripts/setup-coredns.sh
