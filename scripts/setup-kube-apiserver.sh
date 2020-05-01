@@ -1,6 +1,5 @@
 #!/bin/bash
 # $1 total master nodes
-# $2 current master node number to be setup
 
 cd ~
 
@@ -39,7 +38,7 @@ then
   }
   echo "Completed restart of kube-apiserver"
 
-# else etcd service is not installed
+# else kube-apiserver service is not installed
 else
   echo "Not found kube-apiserver as installed"
 

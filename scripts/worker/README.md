@@ -4,7 +4,7 @@
 ```
 cd ~/kthw-azure-git/infra
 
-# initialise variables set for the infrastructure
+# load variables already set for the infrastructure
 source azurerm-secret.tfvars
 
 # determine location code from location

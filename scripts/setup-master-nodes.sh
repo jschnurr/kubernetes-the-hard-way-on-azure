@@ -1,15 +1,16 @@
 #!/bin/bash
 # $1 total master nodes
-# $2 create certificates?
-# $3 create kubernetes configurations?
 
-# initialise variables set for the infrastructure
+echo "Started initialisation"
+# load variables already set for the infrastructure
 source azurerm-secret.tfvars
 
 # determine location code from location
 location_code=$(az account list-locations --query "[?displayName=='$location']".{Code:name} -o tsv)
 
+# change current directory from infra
 cd ../scripts/master
+echo "Completed initialisation"
 
 # setup etcd server
 echo "Started setting up of etcd server"
@@ -31,7 +32,7 @@ echo "Completed setting up of etcd server"
 
 # setup kubernetes api server
 echo "Started setting up of kubernetes api server"
-# create encryption key
+# create encryption key config if not already existing
 if [ ! -s configs/encryption-config.yaml ]
 then
   echo "Creating encryption config file"
@@ -53,7 +54,7 @@ do
   echo "Executing install script on $prefix-$environment-mastervm0$i.$location_code.cloudapp.azure.com"
   ssh -o "StrictHostKeyChecking no" \
     usr1@$prefix-$environment-mastervm0$i.$location_code.cloudapp.azure.com \
-    'bash -s' < ../setup-kube-apiserver.sh $1 $i
+    'bash -s' < ../setup-kube-apiserver.sh $1
 done
 
 # add kube-apiserver user to system:kube-apiserver-to-kubelet role (new) for exec and port-forward operation access
@@ -67,7 +68,21 @@ echo "Completed setting up of kubernetes api server"
 
 
 # setup kubernetes scheduler
+echo "Started setting up of kubernetes scheduler"
+for (( i=1; i<=$1; i++ ))
+do
+  # remote copy files
+  echo "Copying files to $prefix-$environment-mastervm0$i.$location_code.cloudapp.azure.com"
+  scp -o "StrictHostKeyChecking no" configs/kube-scheduler.kubeconfig kube-scheduler.service \
+    usr1@$prefix-$environment-mastervm0$i.$location_code.cloudapp.azure.com:~
 
+  # remote execute install script
+  echo "Executing install script on $prefix-$environment-mastervm0$i.$location_code.cloudapp.azure.com"
+  ssh -o "StrictHostKeyChecking no" \
+    usr1@$prefix-$environment-mastervm0$i.$location_code.cloudapp.azure.com \
+    'bash -s' < ../setup-kube-scheduler.sh
+done
+echo "Completed setting up of kubernetes scheduler"
 
 # setup kubernetes controller manager
 
