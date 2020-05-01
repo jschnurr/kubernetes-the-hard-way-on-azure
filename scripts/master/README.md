@@ -1,5 +1,16 @@
 # Install kubernetes in master node
 
+## Initialisation
+```
+cd ~/kthw-azure-git/infra
+
+# initialise variables set for the infrastructure
+source azurerm-secret.tfvars
+
+# determine location code from location
+location_code=$(az account list-locations --query "[?displayName=='$location']".{Code:name} -o tsv)
+```
+
 ## Create certificates
 ```
 # comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
@@ -81,14 +92,8 @@ cd ~/kthw-azure-git/scripts/master
 # copy the template openssl config file
 cp openssl-kube-apiserver.cnf openssl-kube-apiserver-secret.cnf
 
-# generate openssl configuration file for your environment by replacing VALUE in the following command:
-sed -i 's/<PREFIX>/VALUE/g; s/<ENVIRONMENT>/VALUE/g; s/<LOCATION_CODE>/VALUE/g' openssl-kube-apiserver-secret.cnf
-
-# to know the VALUE for your <LOCATION_CODE>, note the corresponding value under the 'Name' column from the following command output:
-az account list-locations -o table
-
-# refer to infra/azurerm-secret.tfvars file for what values you chose for your environment for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-sed -i 's/<PREFIX>/kthw/g; s/<ENVIRONMENT>/play/g; s/<LOCATION_CODE>/australiaeast/g' openssl-kube-apiserver-secret.cnf
+# generate openssl configuration file for your environment
+sed -i 's/<PREFIX>/$prefix/g; s/<ENVIRONMENT>/$environment/g; s/<LOCATION_CODE>/$location_code/g' openssl-kube-apiserver-secret.cnf
 
 # generate certificate passing the openssl configuration generated from last step
 .././gen-advanced-cert.sh kube-apiserver ca "/CN=kube-apiserver" openssl-kube-apiserver-secret
@@ -112,15 +117,7 @@ cd ~/kthw-azure-git/scripts/master
 # generate the kube config file for admin user
 .././gen-kube-config.sh kubernetes-the-hard-way-azure \
   certs/ca \
-  https://<PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com:6443 \
-  configs/admin \
-  admin \
-  certs/admin
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-.././gen-kube-config.sh kubernetes-the-hard-way-azure \
-  certs/ca \
-  https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443 \
+  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
   configs/admin \
   admin \
   certs/admin
@@ -133,15 +130,7 @@ cd ~/kthw-azure-git/scripts/master
 # generate the kube config file for kube-scheduler service
 .././gen-kube-config.sh kubernetes-the-hard-way-azure \
   certs/ca \
-  https://<PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com:6443 \
-  configs/kube-scheduler \
-  system:kube-scheduler \
-  certs/kube-scheduler
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-.././gen-kube-config.sh kubernetes-the-hard-way-azure \
-  certs/ca \
-  https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443 \
+  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
   configs/kube-scheduler \
   system:kube-scheduler \
   certs/kube-scheduler
@@ -154,15 +143,7 @@ cd ~/kthw-azure-git/scripts/master
 # generate the kube config file for kube-controller-manager service
 .././gen-kube-config.sh kubernetes-the-hard-way-azure \
   certs/ca \
-  https://<PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com:6443 \
-  configs/kube-controller-manager \
-  system:kube-controller-manager \
-  certs/kube-controller-manager
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-.././gen-kube-config.sh kubernetes-the-hard-way-azure \
-  certs/ca \
-  https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443 \
+  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
   configs/kube-controller-manager \
   system:kube-controller-manager \
   certs/kube-controller-manager
@@ -177,20 +158,13 @@ cd ~/kthw-azure-git/scripts/master
 
 # remote copy to mastervm01
 scp certs/ca.crt certs/etcd* etcd.service \
-  usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp certs/ca.crt certs/etcd* etcd.service \
-  usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com:~
 ```
 
 ### Download, install and configure etcd server (inside master node)
 ```
 # remote login to mastervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
@@ -278,21 +252,13 @@ cd ~/kthw-azure-git/scripts/master
 # remote copy to the mastervm01
 scp certs/ca.crt certs/ca.key certs/kube-apiserver* certs/service-account* certs/etcd* \
   configs/encryption-config.yaml kube-apiserver.service \
-  usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp certs/ca.crt certs/ca.key certs/kube-apiserver* certs/service-account* certs/etcd* \
-  configs/encryption-config.yaml kube-apiserver.service \
-  usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com:~
 ```
 
 ### Download, install and configure kube-apiserver service (inside master node)
 ```
 # remote login to mastervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
@@ -358,20 +324,13 @@ cd ~/kthw-azure-git/scripts/master
 
 # remote copy to the mastervm01
 scp configs/kube-scheduler.kubeconfig kube-scheduler.service \
-  usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp configs/kube-scheduler.kubeconfig kube-scheduler.service \
-  usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com:~
 ```
 
 ### Download, install and configure kube-scheduler service (inside master node)
 ```
 # remote login to mastervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
@@ -417,20 +376,13 @@ cd ~/kthw-azure-git/scripts/master
 
 # remote copy to the mastervm01
 scp configs/kube-controller-manager.kubeconfig kube-controller-manager.service \
-  usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp configs/kube-controller-manager.kubeconfig kube-controller-manager.service \
-  usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com:~
 ```
 
 ### Download, install and configure kube-controller-manager service (inside master node)
 ```
 # remote login to mastervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
@@ -476,20 +428,13 @@ cd ~/kthw-azure-git/scripts/master
 
 # remote copy to the mastervm01
 scp healthprobe \
-  usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com:~
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-scp healthprobe \
-  usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com:~
+  usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com:~
 ```
 
 ### Download, install and configure nginx (inside master node)
 ```
 # remote login to mastervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
