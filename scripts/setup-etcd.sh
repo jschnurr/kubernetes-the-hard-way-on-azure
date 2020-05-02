@@ -153,7 +153,7 @@ else
 
   # download etcd v3.4.7
   echo "Started installation of etcd"
-  wget -q --show-progress --https-only --timestamping \
+  wget --progress=bar:force:noscroll --https-only \
     "https://github.com/etcd-io/etcd/releases/download/v3.4.7/etcd-v3.4.7-linux-amd64.tar.gz"
 
   # extract etcd binaries and install

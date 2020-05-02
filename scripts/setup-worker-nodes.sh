@@ -153,16 +153,6 @@ do
     'bash -s' < ../setup-kubelet.sh $i
 done
 
-# approve certificate signing request (csr) of worker node
-echo "Approving certificate signing request (csr) of worker node"
-# give time for worker node to register
-sleep 5
-# get pending csrs
-csrs="$(kubectl get csr --kubeconfig configs/admin.kubeconfig | grep -oP '^\w+-\w+(?=.*Pending$)' | tr '\n' ' ')"
-# approve the pending csrs
-kubectl certificate approve $csrs --kubeconfig configs/admin.kubeconfig
-echo "Completed setting up of kubernetes kubelet"
-
 
 # setup kubernetes kube-proxy
 echo -e "\nStarted setting up of kubernetes kube-proxy"
@@ -180,6 +170,19 @@ do
     'bash -s' < ../setup-kube-proxy.sh
 done
 echo "Completed setting up of kubernetes kube-proxy"
+
+
+# give time for worker node to register
+echo "Sleeping to give time for worker node to register"
+sleep 20
+
+# approve certificate signing request (csr) of worker node
+echo "Approving certificate signing request (csr) of worker node"
+# get pending csrs
+csrs="$(kubectl get csr --kubeconfig configs/admin.kubeconfig | grep -oP '^\w+-\w+(?=.*Pending$)' | tr '\n' ' ')"
+# approve the pending csrs
+kubectl certificate approve $csrs --kubeconfig configs/admin.kubeconfig
+echo "Completed setting up of kubernetes kubelet"
 
 
 # verify worker nodes setup after everything

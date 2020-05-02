@@ -13,6 +13,10 @@ kubectl apply -f deployments/coredns.yaml --kubeconfig worker/configs/admin.kube
 echo -e "\nDisplaying 'kubectl get all --all-namespaces' output"
 kubectl get all --all-namespaces --kubeconfig worker/configs/admin.kubeconfig
 
+# give time for coredns to start
+echo "Sleeping to give time for coredns to start"
+sleep 40
+
 echo -e "\nDisplaying 'nslookup kubernetes' output"
-# execute nslookup command in the dnsutils container to test dns
-kubectl run -it --rm --kubeconfig worker/configs/admin.kubeconfig --image=tutum/dnsutils dnsutils -- nslookup kubernetes
+# execute nslookup command in the busybox container to test dns
+kubectl run -it --rm --kubeconfig worker/configs/admin.kubeconfig --image=busybox:1.28 busybox -- nslookup kubernetes

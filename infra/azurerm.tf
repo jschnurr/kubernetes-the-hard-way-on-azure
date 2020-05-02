@@ -423,7 +423,8 @@ resource "azurerm_linux_virtual_machine" "workervm" {
     public_key = file(var.ssh_key_file)
   }
 
-  count = var.worker_vm_count
+  count      = var.worker_vm_count
+  depends_on = [azurerm_linux_virtual_machine.mastervm, null_resource.setup_master_nodes, azurerm_lb_rule.lbr01, null_resource.setup_health_check_endpoint]
 
   tags = {
     managedby = "terraform"
@@ -486,7 +487,7 @@ resource "azurerm_lb_probe" "lbp01" {
   protocol            = "Http"
   request_path        = "/healthz"
   port                = 80
-  interval_in_seconds = 10
+  interval_in_seconds = 5
 }
 
 # network load balancer - load balancing rule with health probe
@@ -504,7 +505,7 @@ resource "azurerm_lb_rule" "lbr01" {
   probe_id = azurerm_lb_probe.lbp01.id
 
   count      = var.enable_health_probe ? 1 : 0
-  depends_on = [azurerm_lb_rule.lbr01noprobe]
+  depends_on = [azurerm_lb_rule.lbr01noprobe, null_resource.setup_health_check_endpoint]
 }
 
 # network load balancer - load balancing rule without health probe
@@ -525,27 +526,37 @@ resource "azurerm_lb_rule" "lbr01noprobe" {
 resource "null_resource" "setup_master_nodes" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "../scripts/setup-master-nodes.sh ${var.master_vm_count}"
+    command     = "sleep 15; ../scripts/setup-master-nodes.sh ${var.master_vm_count}"
+  }
+  triggers = {
+    node_count = length(azurerm_linux_virtual_machine.mastervm)
   }
 
   count      = var.enable_master_setup ? 1 : 0
-  depends_on = [azurerm_linux_virtual_machine.mastervm]
+  depends_on = [azurerm_linux_virtual_machine.mastervm, azurerm_lb_rule.lbr01, null_resource.setup_health_check_endpoint]
 }
 
 resource "null_resource" "setup_health_check_endpoint" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "../scripts/setup-health-check-endpoint.sh ${var.master_vm_count}"
+    command     = "sleep 15; ../scripts/setup-health-check-endpoint.sh ${var.master_vm_count}"
+  }
+  triggers = {
+    node_count   = length(azurerm_linux_virtual_machine.mastervm)
+    health_probe = var.enable_health_probe
   }
 
   count      = var.enable_health_probe ? 1 : 0
-  depends_on = [azurerm_lb_rule.lbr01, null_resource.setup_master_nodes]
+  depends_on = [azurerm_linux_virtual_machine.mastervm]
 }
 
 resource "null_resource" "setup_worker_nodes" {
   provisioner "local-exec" {
     interpreter = ["bash", "-c"]
-    command     = "../scripts/setup-worker-nodes.sh ${var.worker_vm_count}"
+    command     = "sleep 15; ../scripts/setup-worker-nodes.sh ${var.worker_vm_count}"
+  }
+  triggers = {
+    node_count = length(azurerm_linux_virtual_machine.workervm)
   }
 
   count      = var.enable_worker_setup ? 1 : 0

@@ -44,7 +44,7 @@ else
 
   # download kube-apiserver v1.18.1
   echo "Started installation of kube-apiserver"
-  wget -q --show-progress --https-only --timestamping \
+  wget --progress=bar:force:noscroll --https-only \
     "https://storage.googleapis.com/kubernetes-release/release/v1.18.1/bin/linux/amd64/kube-apiserver"
 
   # configure kube-apiserver service

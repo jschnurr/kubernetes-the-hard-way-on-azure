@@ -27,7 +27,7 @@ else
 
   # download kubelet v1.18.1
   echo "Started installation of kubelet"
-  wget -q --show-progress --https-only --timestamping \
+  wget --progress=bar:force:noscroll --https-only \
     "https://storage.googleapis.com/kubernetes-release/release/v1.18.1/bin/linux/amd64/kubelet"
 
   # configure kubelet service

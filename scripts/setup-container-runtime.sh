@@ -26,7 +26,7 @@ else
 
   # download containerd v1.2.13
   echo "Started installation of containerd"
-  wget -q --show-progress --https-only --timestamping \
+  wget --progress=bar:force:noscroll --https-only \
     "https://github.com/kubernetes-sigs/cri-tools/releases/download/v1.18.0/crictl-v1.18.0-linux-amd64.tar.gz" \
     "https://github.com/opencontainers/runc/releases/download/v1.0.0-rc10/runc.amd64" \
     "https://github.com/containerd/containerd/releases/download/v1.2.13/containerd-1.2.13.linux-amd64.tar.gz"

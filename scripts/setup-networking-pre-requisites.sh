@@ -25,7 +25,7 @@ else
 
   # download cni plugin v0.8.5
   echo "Started installation of cni plugin"
-  wget -q --show-progress --https-only --timestamping \
+  wget --progress=bar:force:noscroll --https-only \
     "https://github.com/containernetworking/plugins/releases/download/v0.8.5/cni-plugins-linux-amd64-v0.8.5.tgz"
 
   # configure cni plugin

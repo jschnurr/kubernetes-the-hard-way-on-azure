@@ -50,7 +50,7 @@ fi
 # create kube-controller-manager client certificate
 if ( $is_new_ca ) || [ ! -s certs/kube-controller-manager.crt ] || [ ! -s certs/kube-controller-manager.key ]
 then
-  ../gen-simple-cert.sh kube-controller-manager ca "/CN=system:kube-scheduler"
+  ../gen-simple-cert.sh kube-controller-manager ca "/CN=system:kube-controller-manager"
 fi
 
 # create service account key pair certificate
@@ -164,14 +164,6 @@ do
     usr1@$prefix-$environment-mastervm0$i.$location_code.cloudapp.azure.com \
     'bash -s' < ../setup-kube-apiserver.sh $1
 done
-
-# add kube-apiserver user to system:kube-apiserver-to-kubelet role (new) for exec and port-forward operation access
-echo "Adding kube-apiserver user to system:kube-apiserver-to-kubelet role (new) for exec and port-forward operation access"
-kubectl apply -f kube-apiserver-to-kubelet.yaml --kubeconfig configs/admin.kubeconfig
-
-# verify kube-apiserver
-echo "Displaying 'kubectl get all --all-namespaces' output"
-kubectl get all --all-namespaces --kubeconfig configs/admin.kubeconfig
 echo "Completed setting up of kubernetes api server"
 
 
@@ -210,6 +202,17 @@ do
 done
 echo "Completed setting up of kubernetes controller manager"
 
+# give time for kube-apiserver to warmup
+echo "Sleeping to give time for kube-apiserver to warmup"
+sleep 20
+
+# verify kube-apiserver
+echo "Displaying 'kubectl get all --all-namespaces' output"
+kubectl get all --all-namespaces --kubeconfig configs/admin.kubeconfig
+
+# add kube-apiserver user to system:kube-apiserver-to-kubelet role (new) for exec and port-forward operation access
+echo "Adding kube-apiserver user to system:kube-apiserver-to-kubelet role (new) for exec and port-forward operation access"
+kubectl apply -f kube-apiserver-to-kubelet.yaml --kubeconfig configs/admin.kubeconfig
 
 # verify master nodes setup after everything
 echo -e "\nDisplaying 'kubectl get componentstatuses' output"

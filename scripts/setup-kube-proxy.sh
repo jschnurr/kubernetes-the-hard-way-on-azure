@@ -26,7 +26,7 @@ else
 
   # download kube-proxy v1.18.1
   echo "Started installation of kube-proxy"
-  wget -q --show-progress --https-only --timestamping \
+  wget --progress=bar:force:noscroll --https-only \
     "https://storage.googleapis.com/kubernetes-release/release/v1.18.1/bin/linux/amd64/kube-proxy"
 
   # configure kube-proxy service
