@@ -99,6 +99,8 @@ cd ~
 
 ## - Install az cli
 ```
+# if this fails on latest Ubuntu 20.04, refer to https://docs.microsoft.com/en-us/cli/azure/install-azure-cli-apt?view=azure-cli-latest#manual-install-instructions and replace $AZ_REPO with 'bionic'
+
 curl -sL https://aka.ms/InstallAzureCLIDeb | sudo bash
 ```
 

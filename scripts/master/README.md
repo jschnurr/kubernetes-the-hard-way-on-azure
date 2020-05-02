@@ -16,7 +16,7 @@ location_code=$(az account list-locations --query "[?displayName=='$location']".
 # comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
 sudo sed -i '0,/RANDFILE/{s/^RANDFILE/\#&/}' /etc/ssl/openssl.cnf
 
-# modify user permissions to read, write and execute all shell scripts
+# modify user permissions to execute all shell scripts
 cd ~/kthw-azure-git/scripts
 chmod +x *.sh
 
@@ -29,7 +29,7 @@ mkdir certs
 ```
 cd ~/kthw-azure-git/scripts/master
 
-.././gen-ca-cert.sh ca "/CN=KUBERNETES-CA"
+../gen-ca-cert.sh ca "/CN=KUBERNETES-CA"
 
 # verify generated certificate
 openssl x509 -text -in certs/ca.crt
@@ -39,7 +39,7 @@ openssl x509 -text -in certs/ca.crt
 ```
 cd ~/kthw-azure-git/scripts/master
 
-.././gen-simple-cert.sh admin ca "/CN=admin/O=system:masters"
+../gen-simple-cert.sh admin ca "/CN=admin/O=system:masters"
 
 # verify generated certificate
 openssl x509 -text -in certs/admin.crt
@@ -49,7 +49,7 @@ openssl x509 -text -in certs/admin.crt
 ```
 cd ~/kthw-azure-git/scripts/master
 
-.././gen-simple-cert.sh kube-scheduler ca "/CN=system:kube-scheduler"
+../gen-simple-cert.sh kube-scheduler ca "/CN=system:kube-scheduler"
 
 # verify generated certificate
 openssl x509 -text -in certs/kube-scheduler.crt
@@ -59,17 +59,17 @@ openssl x509 -text -in certs/kube-scheduler.crt
 ```
 cd ~/kthw-azure-git/scripts/master
 
-.././gen-simple-cert.sh kube-controller-manager ca "/CN=system:kube-controller-manager"
+../gen-simple-cert.sh kube-controller-manager ca "/CN=system:kube-controller-manager"
 
 # verify generated certificate
 openssl x509 -text -in certs/kube-controller-manager.crt
 ```
 
-### Create service account key pair
+### Create service account key pair certificate
 ```
 cd ~/kthw-azure-git/scripts/master
 
-.././gen-simple-cert.sh service-account ca "/CN=service-accounts"
+../gen-simple-cert.sh service-account ca "/CN=service-accounts"
 
 # verify generated certificate
 openssl x509 -text -in certs/service-account.crt
@@ -79,7 +79,7 @@ openssl x509 -text -in certs/service-account.crt
 ```
 cd ~/kthw-azure-git/scripts/master
 
-.././gen-advanced-cert.sh etcd-server ca "/CN=etcd-server" openssl-etcd
+../gen-advanced-cert.sh etcd-server ca "/CN=etcd-server" openssl-etcd
 
 # verify generated certificate
 openssl x509 -text -in certs/etcd-server.crt
@@ -93,10 +93,10 @@ cd ~/kthw-azure-git/scripts/master
 cp openssl-kube-apiserver.cnf openssl-kube-apiserver-secret.cnf
 
 # generate openssl configuration file for your environment
-sed -i 's/<PREFIX>/$prefix/g; s/<ENVIRONMENT>/$environment/g; s/<LOCATION_CODE>/$location_code/g' openssl-kube-apiserver-secret.cnf
+sed -i "s/<PREFIX>/$prefix/g; s/<ENVIRONMENT>/$environment/g; s/<LOCATION_CODE>/$location_code/g" openssl-kube-apiserver-secret.cnf
 
 # generate certificate passing the openssl configuration generated from last step
-.././gen-advanced-cert.sh kube-apiserver ca "/CN=kube-apiserver" openssl-kube-apiserver-secret
+../gen-advanced-cert.sh kube-apiserver ca "/CN=kube-apiserver" openssl-kube-apiserver-secret
 
 # verify generated certificate
 openssl x509 -text -in certs/kube-apiserver.crt
@@ -115,9 +115,9 @@ mkdir configs
 cd ~/kthw-azure-git/scripts/master
 
 # generate the kube config file for admin user
-.././gen-kube-config.sh kubernetes-the-hard-way-azure \
+../gen-kube-config.sh kubernetes-the-hard-way-azure \
   certs/ca \
-  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
+  "https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443" \
   configs/admin \
   admin \
   certs/admin
@@ -128,9 +128,9 @@ cd ~/kthw-azure-git/scripts/master
 cd ~/kthw-azure-git/scripts/master
 
 # generate the kube config file for kube-scheduler service
-.././gen-kube-config.sh kubernetes-the-hard-way-azure \
+../gen-kube-config.sh kubernetes-the-hard-way-azure \
   certs/ca \
-  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
+  "https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443" \
   configs/kube-scheduler \
   system:kube-scheduler \
   certs/kube-scheduler
@@ -141,9 +141,9 @@ cd ~/kthw-azure-git/scripts/master
 cd ~/kthw-azure-git/scripts/master
 
 # generate the kube config file for kube-controller-manager service
-.././gen-kube-config.sh kubernetes-the-hard-way-azure \
+../gen-kube-config.sh kubernetes-the-hard-way-azure \
   certs/ca \
-  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
+  "https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443" \
   configs/kube-controller-manager \
   system:kube-controller-manager \
   certs/kube-controller-manager

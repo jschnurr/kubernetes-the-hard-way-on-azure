@@ -10,6 +10,124 @@ location_code=$(az account list-locations --query "[?displayName=='$location']".
 
 # change current directory from infra
 cd ../scripts/master
+
+# comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
+sudo sed -i '0,/RANDFILE/{s/^RANDFILE/\#&/}' /etc/ssl/openssl.cnf
+
+# modify user permissions to execute all shell scripts
+chmod +x ../*.sh
+
+# create certificates, if not already existing
+
+# create a directory to hold all the generated certificates
+if [ ! -d certs ]
+then
+  mkdir certs
+fi
+
+# create ca certificate
+is_new_ca=false
+if [ ! -s certs/ca.crt ] || [ ! -s certs/ca.key ]
+then
+  is_new_ca=true
+  ../gen-ca-cert.sh ca "/CN=KUBERNETES-CA"
+
+  rm ../worker/certs/ca.* -f
+fi
+
+# create admin client certificate
+if ( $is_new_ca ) || [ ! -s certs/admin.crt ] || [ ! -s certs/admin.key ]
+then
+  ../gen-simple-cert.sh admin ca "/CN=admin/O=system:masters"
+fi
+
+# create kube-scheduler client certificate
+if ( $is_new_ca ) || [ ! -s certs/kube-scheduler.crt ] || [ ! -s certs/kube-scheduler.key ]
+then
+  ../gen-simple-cert.sh kube-scheduler ca "/CN=system:kube-scheduler"
+fi
+
+# create kube-controller-manager client certificate
+if ( $is_new_ca ) || [ ! -s certs/kube-controller-manager.crt ] || [ ! -s certs/kube-controller-manager.key ]
+then
+  ../gen-simple-cert.sh kube-controller-manager ca "/CN=system:kube-scheduler"
+fi
+
+# create service account key pair certificate
+if ( $is_new_ca ) || [ ! -s certs/service-account.crt ] || [ ! -s certs/service-account.key ]
+then
+  ../gen-simple-cert.sh service-account ca "/CN=service-accounts"
+fi
+
+# create etcd server certificate
+if ( $is_new_ca ) || [ ! -s certs/etcd-server.crt ] || [ ! -s certs/etcd-server.key ]
+then
+  ../gen-advanced-cert.sh etcd-server ca "/CN=etcd-server" openssl-etcd
+fi
+
+# create kube-apiserver certificate
+if ( $is_new_ca ) || [ ! -s certs/kube-apiserver.crt ] || [ ! -s certs/kube-apiserver.key ]
+then
+  # copy the template openssl config file
+  cp openssl-kube-apiserver.cnf openssl-kube-apiserver-secret.cnf
+
+  # generate openssl configuration file for your environment
+  sed -i "s/<PREFIX>/$prefix/g; s/<ENVIRONMENT>/$environment/g; s/<LOCATION_CODE>/$location_code/g" openssl-kube-apiserver-secret.cnf
+
+  # generate certificate passing the openssl configuration generated from last step
+  ../gen-advanced-cert.sh kube-apiserver ca "/CN=kube-apiserver" openssl-kube-apiserver-secret
+fi
+
+# create kubernetes configurations, if not already existing
+
+# create a directory to hold all the generated certificates
+if [ ! -d configs ]
+then
+  mkdir configs
+fi
+
+# create admin kube config file
+if [ ! -s configs/admin.kubeconfig ]
+then
+  ../gen-kube-config.sh kubernetes-the-hard-way-azure \
+    certs/ca \
+    "https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443" \
+    configs/admin \
+    admin \
+    certs/admin
+fi
+
+# create kube-scheduler kube config file
+if [ ! -s configs/kube-scheduler.kubeconfig ]
+then
+  ../gen-kube-config.sh kubernetes-the-hard-way-azure \
+    certs/ca \
+    "https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443" \
+    configs/kube-scheduler \
+    system:kube-scheduler \
+    certs/kube-scheduler
+fi
+
+# create kube-controller-manager kube config file
+if [ ! -s configs/kube-controller-manager.kubeconfig ]
+then
+  ../gen-kube-config.sh kubernetes-the-hard-way-azure \
+    certs/ca \
+    "https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443" \
+    configs/kube-controller-manager \
+    system:kube-controller-manager \
+    certs/kube-controller-manager
+fi
+
+# create encryption key config file
+if [ ! -s configs/encryption-config.yaml ]
+then
+  # copy the template encryption config yaml file
+  cp encryption-config.yaml configs/encryption-config.yaml
+
+  # generate openssl encryption config yaml file by substituting encyrption key with random value
+  sed -i "s|<ENCRYPTION_KEY>|$(head -c 32 /dev/urandom | base64)|g" configs/encryption-config.yaml
+fi
 echo "Completed initialisation"
 
 # setup etcd server
@@ -32,16 +150,6 @@ echo "Completed setting up of etcd server"
 
 # setup kubernetes api server
 echo -e "\nStarted setting up of kubernetes api server"
-# create encryption key config if not already existing
-if [ ! -s configs/encryption-config.yaml ]
-then
-  echo "Creating encryption config file"
-  # copy the template encryption config yaml file
-  cp encryption-config.yaml configs/encryption-config.yaml
-
-  # generate openssl encryption config yaml file by substituting encyrption key with random value
-  sed -i "s|<ENCRYPTION_KEY>|$(head -c 32 /dev/urandom | base64)|g" configs/encryption-config.yaml
-fi
 for (( i=1; i<=$1; i++ ))
 do
   # remote copy files

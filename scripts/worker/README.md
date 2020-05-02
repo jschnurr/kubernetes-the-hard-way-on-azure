@@ -16,7 +16,7 @@ location_code=$(az account list-locations --query "[?displayName=='$location']".
 # comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
 sudo sed -i '0,/RANDFILE/{s/^RANDFILE/\#&/}' /etc/ssl/openssl.cnf
 
-# modify user permissions to read, write and execute all shell scripts
+# modify user permissions to execute all shell scripts
 cd ~/kthw-azure-git/scripts
 chmod +x *.sh
 
@@ -26,7 +26,7 @@ mkdir certs
 
 # copy ca certs from master
 cd ~/kthw-azure-git/scripts/worker
-cp ../master/certs/ca* certs/
+cp ../master/certs/ca.* certs/
 
 # create a directory to hold all the generated configurations
 cd ~/kthw-azure-git/scripts/worker
@@ -41,7 +41,7 @@ cp ../master/configs/admin.kubeconfig configs/
 ```
 cd ~/kthw-azure-git/scripts/worker
 
-.././gen-simple-cert.sh kube-proxy ca "/CN=system:kube-proxy"
+../gen-simple-cert.sh kube-proxy ca "/CN=system:kube-proxy"
 
 # verify generated certificate
 openssl x509 -text -in certs/kube-proxy.crt
@@ -91,32 +91,31 @@ kubectl create -f auto-approve-renewals-for-nodes.yaml --kubeconfig configs/admi
 
 ## Create kubernetes configurations
 
-### Create kube-proxy kube config file
-```
-cd ~/kthw-azure-git/scripts/worker
-
-# generate the kube config file for kube-proxy service
-.././gen-kube-config.sh kubernetes-the-hard-way-azure \
-  certs/ca \
-  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
-  configs/kube-proxy \
-  system:kube-proxy \
-  certs/kube-proxy
-```
-
 ### Create bootstrap kube config file for kubelet
 ```
 cd ~/kthw-azure-git/scripts/worker
 
 # generate the kube config file for kubelet service
-.././gen-bootstrap-kube-config.sh bootstrap \
+../gen-bootstrap-kube-config.sh bootstrap \
   certs/ca \
-  https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443 \
+  "https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443" \
   configs/bootstrap-kubeconfig \
   kubelet-bootstrap \
   $(cat configs/bootstrap-token.yaml | grep -oP "token-id:\s?\K\w+").$(cat configs/bootstrap-token.yaml | grep -oP "token-secret:\s?\K\w+")
 ```
 
+### Create kube-proxy kube config file
+```
+cd ~/kthw-azure-git/scripts/worker
+
+# generate the kube config file for kube-proxy service
+../gen-kube-config.sh kubernetes-the-hard-way-azure \
+  certs/ca \
+  "https://$prefix-$environment-apiserver.$location_code.cloudapp.azure.com:6443" \
+  configs/kube-proxy \
+  system:kube-proxy \
+  certs/kube-proxy
+```
 
 ## Install worker node pre-requisites
 
