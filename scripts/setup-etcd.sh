@@ -1,8 +1,9 @@
 #!/bin/bash
-# $1 total master nodes
-# $2 current master node number to be setup
-# $3 prefix
-# $4 environment
+# remotely executed script
+# $1 - total master nodes
+# $2 - current master node number to be setup
+# $3 - prefix
+# $4 - environment
 
 cd ~
 

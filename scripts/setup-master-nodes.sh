@@ -1,5 +1,7 @@
 #!/bin/bash
-# $1 total master nodes
+# locally executed script assumes the current/execution directory:
+# "cd ~/kthw-azure-git/infra"
+# $1 - total master nodes
 
 echo -e "\nStarted initialisation"
 # load variables already set for the infrastructure
@@ -72,7 +74,7 @@ then
   cp openssl-kube-apiserver.cnf openssl-kube-apiserver-secret.cnf
 
   # generate openssl configuration file for your environment
-  sed -i "s/<PREFIX>/$prefix/g; s/<ENVIRONMENT>/$environment/g; s/<LOCATION_CODE>/$location_code/g" openssl-kube-apiserver-secret.cnf
+  sed -i "s|<PREFIX>|$prefix|g; s|<ENVIRONMENT>|$environment|g; s|<LOCATION_CODE>|$location_code|g" openssl-kube-apiserver-secret.cnf
 
   # generate certificate passing the openssl configuration generated from last step
   ../gen-advanced-cert.sh kube-apiserver ca "/CN=kube-apiserver" openssl-kube-apiserver-secret

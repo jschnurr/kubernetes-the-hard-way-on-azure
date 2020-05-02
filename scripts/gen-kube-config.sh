@@ -1,10 +1,12 @@
 #!/bin/bash
-# $1 = cluster name
-# $2 = ca certificate file name w/o extension
-# $3 = api server url
-# $4 = kube config file name w/o extension
-# $5 = user name
-# $6 = user certificate file name w/o extension
+# locally executed script assumes the current/execution directory:
+# "cd ~/kthw-azure-git/scripts/master" or "cd ~/kthw-azure-git/scripts/worker"
+# $1 - cluster name
+# $2 - ca certificate file name w/o extension
+# $3 - api server url
+# $4 - kube config file name w/o extension
+# $5 - user name
+# $6 - user certificate file name w/o extension
 
 {
   kubectl config set-cluster $1 \

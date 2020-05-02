@@ -1,6 +1,8 @@
 #!/bin/bash
-# $1 = ca certificate file name w/o extension
-# $2 = ca subject
+# locally executed script assumes the current/execution directory:
+# "cd ~/kthw-azure-git/scripts/master" or "cd ~/kthw-azure-git/scripts/worker"
+# $1 - ca certificate file name w/o extension
+# $2 - ca subject
 
 # create private key
 openssl genrsa -out certs/$1.key 2048

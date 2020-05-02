@@ -153,7 +153,6 @@ az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/<SUBSCRIP
 
 # generate an ssh key, if you don't already have one:
 ssh-keygen -b 4096 -t rsa -C <EMAIL_ADDRESS>
-
 # note the path of the file "~/.ssh/id_rsa.pub" as <SSH_PUBLIC_KEY_FILE>
 
 # copy the template variable file
@@ -161,47 +160,74 @@ cd ~/kthw-azure-git/infra
 cp azurerm.tfvars azurerm-secret.tfvars
 
 # substitute the value for <SUBSCRIPTION_ID> by replacing VALUE in the following command:
-sed -i 's/<SUBSCRIPTION_ID>/VALUE/g' azurerm-secret.tfvars
+sed -i 's|<SUBSCRIPTION_ID>|VALUE|g' azurerm-secret.tfvars
 # for e.g., the command to substitute the value for <SUBSCRIPTION_ID> with 794a7d2a-565a-4ebd-8dd9-0439763e6b55 as VALUE looks like this:
-sed -i 's/<SUBSCRIPTION_ID>/794a7d2a-565a-4ebd-8dd9-0439763e6b55/g' azurerm-secret.tfvars
+sed -i 's|<SUBSCRIPTION_ID>|794a7d2a-565a-4ebd-8dd9-0439763e6b55|g' azurerm-secret.tfvars
 
 # substitute the value for <TENANT_ID> by replacing VALUE in the following command:
-sed -i 's/<TENANT_ID>/VALUE/g' azurerm-secret.tfvars
+sed -i 's|<TENANT_ID>|VALUE|g' azurerm-secret.tfvars
 
 # substitute the value for <CLIENT_ID> by replacing VALUE in the following command:
-sed -i 's/<CLIENT_ID>/VALUE/g' azurerm-secret.tfvars
+sed -i 's|<CLIENT_ID>|VALUE|g' azurerm-secret.tfvars
 
-# substitute the value for <CLIENT_SECRET> by replacing VALUE in the following command:
-sed -i 's/<CLIENT_SECRET>/VALUE/g' azurerm-secret.tfvars
+# substitute the value for <CLIENT_SECRET> by replacing VALUE in the command
+sed -i 's|<CLIENT_SECRET>|VALUE|g' azurerm-secret.tfvars
 
-# substitute the value for <SSH_PUBLIC_KEY_FILE> by replacing VALUE in the following command:
+# substitute the value for <SSH_PUBLIC_KEY_FILE> by replacing VALUE in the command
 # VALUE e.g. "~/.ssh/id_rsa.pub"
-sed -i 's/<SSH_PUBLIC_KEY_FILE>/VALUE/g' azurerm-secret.tfvars
-
-# substitute the value for <ENVIRONMENT> by replacing VALUE in the following command:
-# VALUE e.g. "play" or "poc" or "dev" or "demo" etc.
-sed -i 's/<ENVIRONMENT>/VALUE/g' azurerm-secret.tfvars
-
-# substitute the value for <LOCATION> by replacing VALUE in the following command:
-# VALUE e.g. "Australia East" or "Southeast Asia" or "Central US" etc. - for more, run "az account list-locations -o table"
-sed -i 's/<LOCATION>/VALUE/g' azurerm-secret.tfvars
+sed -i 's|<SSH_PUBLIC_KEY_FILE>|VALUE|g' azurerm-secret.tfvars
 
 # substitute the value for <PREFIX> by replacing VALUE in the following command:
 # VALUE e.g. "kthw" or "kube" etc.
-sed -i 's/<PREFIX>/VALUE/g' azurerm-secret.tfvars
+sed -i 's|<PREFIX>|VALUE|g' azurerm-secret.tfvars
+
+# substitute the value for <ENVIRONMENT> by replacing VALUE in the command
+# VALUE e.g. "demo" or "play" or "poc" or "dev" or "test" etc.
+sed -i 's|<ENVIRONMENT>|VALUE|g' azurerm-secret.tfvars
+
+# substitute the value for <LOCATION> by replacing VALUE in the command
+# VALUE e.g. "Australia East" or "Southeast Asia" or "Central US" etc.
+# run this to know more: "az account list-locations -o table"
+sed -i 's|<LOCATION>|VALUE|g' azurerm-secret.tfvars
 
 # substitute the value for <MASTER_VM_SIZE> by replacing VALUE in the following command:
-# VALUE e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table"
-sed -i 's/<MASTER_VM_SIZE>/VALUE/g' azurerm-secret.tfvars
+# VALUE e.g. "Standard_B1ms" etc.
+# run this to know more: "az vm list-sizes --location "<LOCATION>" -o table"
+sed -i 's|<MASTER_VM_SIZE>|VALUE|g' azurerm-secret.tfvars
 
 # substitute the value for <MASTER_VM_COUNT> by replacing VALUE in the following command:
 # VALUE e.g. 1 or 2 etc. upto a maximum of 5
-sed -i 's/<MASTER_VM_COUNT>/VALUE/g' azurerm-secret.tfvars
+# choose 1 if you are learning and then auto-scale later
+sed -i 's|<MASTER_VM_COUNT>|VALUE|g' azurerm-secret.tfvars
 
 # substitute the value for <WORKER_VM_SIZE> by replacing VALUE in the following command:
 # VALUE e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table"
-sed -i 's/<WORKER_VM_SIZE>/VALUE/g' azurerm-secret.tfvars
+sed -i 's|<WORKER_VM_SIZE>|VALUE|g' azurerm-secret.tfvars
 
 # substitute the value for <WORKER_VM_COUNT> by replacing VALUE in the following command:
 # VALUE e.g. 1 or 2 etc. upto a maximum of 9
-sed -i 's/<WORKER_VM_COUNT>/VALUE/g' azurerm-secret.tfvars
+# choose 1 if you are learning and then auto-scale later
+sed -i 's|<WORKER_VM_COUNT>|VALUE|g' azurerm-secret.tfvars
+
+# verify the auzurerm-secret.tfvars file by displaying its content
+cat azurerm-secret.tfvars
+
+# output should be something like this
+subscription_id="794a7d2a-565a-4ebd-8dd9-0439763e6b55"
+tenant_id="<removed as secret>" 
+client_id="<removed as secret>"
+client_secret="<removed as secret>"
+prefix="kthw"
+environment="demo"
+location="Australia East"
+ssh_public_key_file="~/.ssh/id_rsa.pub"
+master_vm_size="Standard_B1ms"
+master_vm_count=1
+master_disk_size_gb=32
+worker_vm_size="Standard_B1ms"
+worker_vm_count=1
+worker_disk_size_gb=32
+enable_health_probe=false
+enable_master_setup=false
+enable_worker_setup=false
+```

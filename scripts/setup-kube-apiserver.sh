@@ -1,5 +1,6 @@
 #!/bin/bash
-# $1 total master nodes
+# remotely executed script
+# $1 - total master nodes
 
 cd ~
 

@@ -1,4 +1,5 @@
 #!/bin/bash
+# remotely executed script
 
 cd ~
 

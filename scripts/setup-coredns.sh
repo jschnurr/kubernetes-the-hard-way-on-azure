@@ -1,4 +1,6 @@
 #!/bin/bash
+# locally executed script assumes the current/execution directory:
+# "cd ~/kthw-azure-git/scripts/master" or "cd ~/kthw-azure-git/scripts/worker"
 
 echo -e "\nStarted initialisation"
 # change current directory from infra

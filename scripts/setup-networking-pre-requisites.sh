@@ -1,5 +1,6 @@
 #!/bin/bash
-# $1 current worker node number to be setup
+# remotely executed script
+# $1 - current worker node number to be setup
 
 cd ~
 

@@ -93,7 +93,7 @@ cd ~/kthw-azure-git/scripts/master
 cp openssl-kube-apiserver.cnf openssl-kube-apiserver-secret.cnf
 
 # generate openssl configuration file for your environment
-sed -i "s/<PREFIX>/$prefix/g; s/<ENVIRONMENT>/$environment/g; s/<LOCATION_CODE>/$location_code/g" openssl-kube-apiserver-secret.cnf
+sed -i "s|<PREFIX>|$prefix|g; s|<ENVIRONMENT>|$environment|g; s|<LOCATION_CODE>|$location_code|g" openssl-kube-apiserver-secret.cnf
 
 # generate certificate passing the openssl configuration generated from last step
 ../gen-advanced-cert.sh kube-apiserver ca "/CN=kube-apiserver" openssl-kube-apiserver-secret

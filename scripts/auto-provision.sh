@@ -1,5 +1,7 @@
 #!/bin/bash
-# $1 log output file w/ path and extension
+# locally executed script assumes the current/execution directory:
+# "cd ~/kthw-azure-git/infra"
+# $1 - output log file name w/ extension and full path
 
 terraform init
 

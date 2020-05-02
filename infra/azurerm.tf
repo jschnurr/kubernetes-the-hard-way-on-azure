@@ -10,17 +10,17 @@ variable "client_id" {
 variable "client_secret" {
   default = ""
 }
+variable "prefix" {
+  default = "kthw"
+}
 variable "environment" {
   default = ""
 }
 variable "location" {
   default = ""
 }
-variable "ssh_key_file" {
+variable "ssh_public_key_file" {
   default = ""
-}
-variable "prefix" {
-  default = "kthw"
 }
 variable "master_vm_size" {
   default = "Standard_B1ms"
@@ -347,7 +347,7 @@ resource "azurerm_linux_virtual_machine" "mastervm" {
 
   admin_ssh_key {
     username   = "usr1"
-    public_key = file(var.ssh_key_file)
+    public_key = file(var.ssh_public_key_file)
   }
 
   count = var.master_vm_count
@@ -420,7 +420,7 @@ resource "azurerm_linux_virtual_machine" "workervm" {
 
   admin_ssh_key {
     username   = "usr1"
-    public_key = file(var.ssh_key_file)
+    public_key = file(var.ssh_public_key_file)
   }
 
   count      = var.worker_vm_count

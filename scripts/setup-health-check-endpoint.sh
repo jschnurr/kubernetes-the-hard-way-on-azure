@@ -1,5 +1,7 @@
 #!/bin/bash
-# $1 total master nodes
+# locally executed script assumes the current/execution directory:
+# "cd ~/kthw-azure-git/infra"
+# $1 - total master nodes
 
 echo -e "\nStarted initialisation"
 # load variables already set for the infrastructure
