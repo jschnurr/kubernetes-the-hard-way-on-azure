@@ -1,4 +1,4 @@
-# Install basic and docker pre-requisites
+# Install base script execution platform
 
 ## - Choose the running platform
 For Windows 10, there are 2 options:
