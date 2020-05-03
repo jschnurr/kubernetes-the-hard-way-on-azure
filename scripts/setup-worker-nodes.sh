@@ -47,7 +47,7 @@ then
 fi
 
 # copy admin kube config file
-if [ ! -s configs/admin.kubeconfig ]
+if ( $is_new_ca ) || [ ! -s configs/admin.kubeconfig ]
 then
   cp ../master/configs/admin.kubeconfig configs/
 fi
@@ -77,7 +77,7 @@ kubectl apply -f auto-approve-csrs-for-group.yaml --kubeconfig configs/admin.kub
 kubectl apply -f auto-approve-renewals-for-nodes.yaml --kubeconfig configs/admin.kubeconfig
 
 # create bootstrap kube config file for kubelet
-if [ ! -s configs/bootstrap-kubeconfig ]
+if ( $is_new_ca ) || [ ! -s configs/bootstrap-kubeconfig ]
 then
   ../gen-bootstrap-kube-config.sh bootstrap \
     certs/ca \
@@ -88,7 +88,7 @@ then
 fi
 
 # create kube-proxy kube config file
-if [ ! -s configs/kube-proxy.kubeconfig ]
+if ( $is_new_ca ) || [ ! -s configs/kube-proxy.kubeconfig ]
 then
   ../gen-kube-config.sh kubernetes-the-hard-way-azure \
     certs/ca \

@@ -86,7 +86,7 @@ then
 fi
 
 # create admin kube config file
-if [ ! -s configs/admin.kubeconfig ]
+if ( $is_new_ca ) || [ ! -s configs/admin.kubeconfig ]
 then
   ../gen-kube-config.sh kubernetes-the-hard-way-azure \
     certs/ca \
@@ -97,7 +97,7 @@ then
 fi
 
 # create kube-scheduler kube config file
-if [ ! -s configs/kube-scheduler.kubeconfig ]
+if ( $is_new_ca ) || [ ! -s configs/kube-scheduler.kubeconfig ]
 then
   ../gen-kube-config.sh kubernetes-the-hard-way-azure \
     certs/ca \
@@ -108,7 +108,7 @@ then
 fi
 
 # create kube-controller-manager kube config file
-if [ ! -s configs/kube-controller-manager.kubeconfig ]
+if ( $is_new_ca ) || [ ! -s configs/kube-controller-manager.kubeconfig ]
 then
   ../gen-kube-config.sh kubernetes-the-hard-way-azure \
     certs/ca \
