@@ -1,4 +1,4 @@
-# Install base script execution platform
+# Install shell script execution platform
 
 ## - Choose the running platform
 For Windows 10, there are 2 options:
@@ -144,7 +144,7 @@ terraform -v
 ---
 ---
 
-# Provision environment
+# Provision infrastructure on cloud
 ```
 cd ~/kthw-azure-git/infra
 

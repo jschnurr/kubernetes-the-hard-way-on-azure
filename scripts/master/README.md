@@ -15,6 +15,7 @@ cd ~/kthw-azure-git/scripts
 chmod +x *.sh
 ```
 
+
 ## Create certificates
 ```
 # create a directory to hold all the generated certificates
