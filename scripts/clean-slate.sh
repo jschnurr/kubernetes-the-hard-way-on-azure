@@ -11,7 +11,7 @@ fi
 
 echo -e "\nDeleting configs and secrets inside scripts/master & scripts/worker"
 rm ../scripts/master/configs ../scripts/master/*secret* \
-  .../scripts/worker/configs ../scripts/worker/*secret* -rf
+  ../scripts/worker/configs ../scripts/worker/*secret* -rf
 
 if [ ! -z "$1" ] && ( $1 )
 then
