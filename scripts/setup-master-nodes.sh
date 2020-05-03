@@ -13,9 +13,6 @@ location_code=$(az account list-locations --query "[?displayName=='$location']".
 # change current directory from infra
 cd ../scripts/master
 
-# comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
-sudo sed -i '0,/RANDFILE/{s/^RANDFILE/\#&/}' /etc/ssl/openssl.cnf
-
 # modify user permissions to execute all shell scripts
 chmod +x ../*.sh
 
@@ -128,7 +125,7 @@ then
   cp encryption-config.yaml configs/encryption-config.yaml
 
   # generate openssl encryption config yaml file by substituting encyrption key with random value
-  sed -i "s|<ENCRYPTION_KEY>|$(head -c 32 /dev/urandom | base64)|g" configs/encryption-config.yaml
+  sed -i "s|<ENCRYPTION_KEY>|$(date +%N%s | sha256sum | head -c 32 | base64)|g" configs/encryption-config.yaml
 fi
 echo "Completed initialisation"
 

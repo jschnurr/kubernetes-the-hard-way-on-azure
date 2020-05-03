@@ -9,17 +9,14 @@ source azurerm-secret.tfvars
 
 # determine location code from location
 location_code=$(az account list-locations --query "[?displayName=='$location']".{Code:name} -o tsv)
-```
-
-## Create certificates
-```
-# comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
-sudo sed -i '0,/RANDFILE/{s/^RANDFILE/\#&/}' /etc/ssl/openssl.cnf
 
 # modify user permissions to execute all shell scripts
 cd ~/kthw-azure-git/scripts
 chmod +x *.sh
+```
 
+## Create certificates
+```
 # create a directory to hold all the generated certificates
 cd ~/kthw-azure-git/scripts/master
 mkdir certs
@@ -242,7 +239,7 @@ cd ~/kthw-azure-git/scripts/master
 cp encryption-config.yaml configs/encryption-config.yaml
 
 # generate openssl encryption config yaml file by substituting encyrption key with random value
-sed -i "s|<ENCRYPTION_KEY>|$(head -c 32 /dev/urandom | base64)|g" configs/encryption-config.yaml
+sed -i "s|<ENCRYPTION_KEY>|$(date +%N%s | sha256sum | head -c 32 | base64)|g" configs/encryption-config.yaml
 ```
 
 ### Remote copy files to master node
@@ -499,7 +496,10 @@ etcd-0               Healthy   {"health":"true"}
 ```
 cd ~/kthw-azure-git/infra
 
-terraform apply -var-file=azurerm-secret.tfvars -var="enable_health_probe=true"
+# set the variable - 'enable_health_probe' value as true
+sed -i 's|^enable_health_probe.*$|enable_health_probe=true|g' azurerm-secret.tfvars
+
+terraform apply -var-file=azurerm-secret.tfvars
 ```
 
 

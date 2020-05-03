@@ -13,9 +13,6 @@ location_code=$(az account list-locations --query "[?displayName=='$location']".
 # change current directory from infra
 cd ../scripts/worker
 
-# comment line starting with RANDFILE in /etc/ssl/openssl.cnf definition to avoid permission issues
-sudo sed -i '0,/RANDFILE/{s/^RANDFILE/\#&/}' /etc/ssl/openssl.cnf
-
 # modify user permissions to execute all shell scripts
 chmod +x ../*.sh
 
