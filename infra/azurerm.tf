@@ -529,7 +529,8 @@ resource "null_resource" "setup_master_nodes" {
     command     = "sleep 15; ../scripts/setup-master-nodes.sh ${var.master_vm_count}"
   }
   triggers = {
-    node_count = length(azurerm_linux_virtual_machine.mastervm)
+    node_count   = length(azurerm_linux_virtual_machine.mastervm)
+    master_setup = var.enable_master_setup
   }
 
   count      = var.enable_master_setup ? 1 : 0
@@ -556,7 +557,8 @@ resource "null_resource" "setup_worker_nodes" {
     command     = "sleep 15; ../scripts/setup-worker-nodes.sh ${var.worker_vm_count}"
   }
   triggers = {
-    node_count = length(azurerm_linux_virtual_machine.workervm)
+    node_count   = length(azurerm_linux_virtual_machine.workervm)
+    worker_setup = var.enable_worker_setup
   }
 
   count      = var.enable_worker_setup ? 1 : 0

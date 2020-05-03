@@ -15,6 +15,7 @@ cd ~/kthw-azure-git/scripts
 chmod +x *.sh
 ```
 
+
 ## Create certificates
 ```
 # modify user permissions to execute all shell scripts

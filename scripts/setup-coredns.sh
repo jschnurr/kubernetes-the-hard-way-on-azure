@@ -27,10 +27,14 @@ kubectl run --kubeconfig worker/configs/admin.kubeconfig --image=busybox:1.28 bu
 echo "Sleeping to give time for busybox to start"
 sleep 10
 
-echo "Displaying 'kubectl logs busybox' output"
+echo -e "\nDisplaying 'kubectl logs busybox' output"
 # get the results from test dns
 kubectl logs busybox --kubeconfig worker/configs/admin.kubeconfig
 
-echo "Displaying 'kubectl delete pod busybox' output"
+echo -e "\nDisplaying 'kubectl delete pod busybox' output"
 # cleanup of busybox pod
 kubectl delete pod busybox --kubeconfig worker/configs/admin.kubeconfig
+
+echo -e "\nDisplaying 'kubectl cluster-info' output"
+# get cluster information
+kubectl cluster-info --kubeconfig worker/configs/admin.kubeconfig

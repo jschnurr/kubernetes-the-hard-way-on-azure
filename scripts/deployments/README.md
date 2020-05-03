@@ -1,6 +1,18 @@
 # Install coredns
 
-## Deploy definition file
+## Initialisation
+```
+cd ~/kthw-azure-git/infra
+
+# load variables already set for the infrastructure
+source azurerm-secret.tfvars
+
+# determine location code from location
+location_code=$(az account list-locations --query "[?displayName=='$location']".{Code:name} -o tsv)
+```
+
+
+## Deploy via coredns deployment definition file
 ```
 cd ~/kthw-azure-git/scripts
 
@@ -13,7 +25,17 @@ kubectl get pods -n kube-system --kubeconfig worker/configs/admin.kubeconfig
 NAME                       READY   STATUS    RESTARTS   AGE
 coredns-5d65dd49c8-75bzk   1/1     Running   0          5m
 coredns-5d65dd49c8-n6fmb   1/1     Running   0          5m
+
+# get cluster information
+kubectl cluster-info --kubeconfig worker/configs/admin.kubeconfig
+
+# output should be something like this
+Kubernetes master is running at https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443
+CoreDNS is running at https://kthw-play-apiserver.australiaeast.cloudapp.azure.com:6443/api/v1/namespaces/kube-system/services/kube-dns:dns/proxy
+
+To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 ```
+
 
 ## Verification of kubernetes setup after completion of all actions
 
@@ -26,10 +48,7 @@ kubectl create secret generic kubernetes-the-hard-way \
   --from-literal="mykey=mydata" --kubeconfig worker/configs/admin.kubeconfig
 
 # remote login to mastervm01
-ssh usr1@<PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com
-
-# substitute the value for <PREFIX>, <ENVIRONMENT> and <LOCATION_CODE> as done in the previous sections for e.g., the command for generating for 'kthw' prefix, 'play' environment and 'australiaeast' as location code looks like this:
-ssh usr1@kthw-play-mastervm01.australiaeast.cloudapp.azure.com
+ssh usr1@$prefix-$environment-mastervm01.$location_code.cloudapp.azure.com
 
 cd ~
 
@@ -79,7 +98,7 @@ kubectl delete secret kubernetes-the-hard-way --kubeconfig worker/configs/admin.
 cd ~/kthw-azure-git/scripts
 
 # create a busybox pod
-kubectl run --generator=run-pod/v1 busybox --image=busybox:1.28 --kubeconfig worker/configs/admin.kubeconfig \
+kubectl run busybox --image=busybox:1.28 --kubeconfig worker/configs/admin.kubeconfig \
   --command -- sleep 3600
 
 # check the newly deployed busybox pod
@@ -111,11 +130,11 @@ cd ~/kthw-azure-git/scripts
 kubectl create deployment nginx --image=nginx --kubeconfig worker/configs/admin.kubeconfig
 
 # collect the nginx pod name
-POD_NAME=$(kubectl get pods -l app=nginx -o jsonpath="{.items[0].metadata.name}" \
+pod_name=$(kubectl get pods -l app=nginx -o jsonpath="{.items[0].metadata.name}" \
   --kubeconfig worker/configs/admin.kubeconfig)
 
 # forward port 80 from inside nginx pod to port 8080 on host
-kubectl port-forward $POD_NAME 8080:80 --kubeconfig worker/configs/admin.kubeconfig
+kubectl port-forward $pod_name 8080:80 --kubeconfig worker/configs/admin.kubeconfig
 
 # try accessing port 8080 on host in a separate terminal
 curl 127.0.0.1:8080
@@ -132,7 +151,7 @@ curl 127.0.0.1:8080
 ctrl+c
 
 # access the nginx pod logs
-kubectl logs $POD_NAME --kubeconfig worker/configs/admin.kubeconfig
+kubectl logs $pod_name --kubeconfig worker/configs/admin.kubeconfig
 
 # output should be something like this
 127.0.0.1 - - [29/Apr/2020:09:37:24 +0000] "GET / HTTP/1.1" 200 612 "-" "curl/7.68.0" "-"
@@ -141,19 +160,14 @@ kubectl logs $POD_NAME --kubeconfig worker/configs/admin.kubeconfig
 kubectl expose deployment nginx --port 80 --type NodePort --kubeconfig worker/configs/admin.kubeconfig
 
 # collect the service node port number
-NODE_PORT=$(kubectl get svc nginx --output=jsonpath='{range .spec.ports[0]}{.nodePort}' \
+node_port=$(kubectl get svc nginx --output=jsonpath='{range .spec.ports[0]}{.nodePort}' \
   --kubeconfig worker/configs/admin.kubeconfig)
 
 # collect the workervm01 public ip address
-az network public-ip show -g <PREFIX>-<ENVIRONMENT>-rg01 -n <PREFIX>-<ENVIRONMENT>-workerpip01 -o table
+node_ip=$(az network public-ip show -g $prefix-$environment-rg01 -n $prefix-$environment-workerpip01 --query "{IP:ipAddress}" -o tsv)
 
-# substitute the value for <PREFIX> and <ENVIRONMENT> as done in the previous sections for e.g., the command for generating for 'kthw' prefix and 'play' environment looks like this:
-az network public-ip show -g kthw-play-rg01 -n kthw-play-workerpip01 -o table
-
-# note the value under 'Address' as <WORKERVM01_PUBLICIP> from the output of previous command
-
-# access the NODE_PORT on workervm01
-curl <WORKERVM01_PUBLICIP>:$NODE_PORT
+# access the node_port on workervm01
+curl $node_ip:$node_port
 
 # output should be something like this
 <!DOCTYPE html>

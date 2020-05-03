@@ -186,27 +186,28 @@ sed -i 's|<PREFIX>|VALUE|g' azurerm-secret.tfvars
 sed -i 's|<ENVIRONMENT>|VALUE|g' azurerm-secret.tfvars
 
 # substitute the value for <LOCATION> by replacing VALUE in the command
-# VALUE e.g. "Australia East" or "Southeast Asia" or "Central US" etc.
+# VALUE e.g. "Australia East" or "Southeast Asia" or "Central US" or "West Europe" etc.
 # run this to know more: "az account list-locations -o table"
 sed -i 's|<LOCATION>|VALUE|g' azurerm-secret.tfvars
 
-# substitute the value for <MASTER_VM_SIZE> by replacing VALUE in the following command:
-# VALUE e.g. "Standard_B1ms" etc.
+# substitute the value for <MASTER_VM_SIZE> by replacing VALUE in the command
+# VALUE e.g. "Standard_B1ms" or "Standard_DS2_v2" etc. with ssd disk capabilities indicated by 's'
 # run this to know more: "az vm list-sizes --location "<LOCATION>" -o table"
 sed -i 's|<MASTER_VM_SIZE>|VALUE|g' azurerm-secret.tfvars
 
-# substitute the value for <MASTER_VM_COUNT> by replacing VALUE in the following command:
+# substitute the value for <MASTER_VM_COUNT> by replacing VALUE in the command
 # VALUE e.g. 1 or 2 etc. upto a maximum of 5
-# choose 1 if you are learning and then auto-scale later
+# choose 1 if you are learning and later auto-scale
 sed -i 's|<MASTER_VM_COUNT>|VALUE|g' azurerm-secret.tfvars
 
-# substitute the value for <WORKER_VM_SIZE> by replacing VALUE in the following command:
-# VALUE e.g. "Standard_B1ms" - for more, run "az vm list-sizes --location "<LOCATION>" -o table"
+# substitute the value for <WORKER_VM_SIZE> by replacing VALUE in the command
+# VALUE e.g. "Standard_B1ms" or "Standard_DS2_v2" etc. with ssd disk capabilities indicated by 's'
+# run this to know more: "az vm list-sizes --location "<LOCATION>" -o table"
 sed -i 's|<WORKER_VM_SIZE>|VALUE|g' azurerm-secret.tfvars
 
-# substitute the value for <WORKER_VM_COUNT> by replacing VALUE in the following command:
+# substitute the value for <WORKER_VM_COUNT> by replacing VALUE in the command
 # VALUE e.g. 1 or 2 etc. upto a maximum of 9
-# choose 1 if you are learning and then auto-scale later
+# choose 1 if you are learning and later auto-scale
 sed -i 's|<WORKER_VM_COUNT>|VALUE|g' azurerm-secret.tfvars
 
 # verify the auzurerm-secret.tfvars file by displaying its content

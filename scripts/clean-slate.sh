@@ -1,20 +1,26 @@
 #!/bin/bash
 # locally executed script assumes the current/execution directory:
 # "cd ~/kthw-azure-git/infra"
-# $1 - enable certificates, configurations & terraform state cleanup
+# $1 - enable certificates & terraform state cleanup
 
 if [ -s terraform.tfstate ]
 then
-  echo "Terraform destroy"
+  echo -e "\nTerraform destroy"
   terraform destroy -auto-approve -var-file=azurerm-secret.tfvars
 fi
 
+echo -e "\nDeleting configs and secrets inside scripts/master & scripts/worker"
+rm ../scripts/master/configs ../scripts/master/*secret* \
+  .../scripts/worker/configs ../scripts/worker/*secret* -rf
+
 if [ ! -z "$1" ] && ( $1 )
 then
-  echo "Deleting certs and configs"
-  rm ../scripts/master/certs ../scripts/master/configs ../scripts/worker/certs ../scripts/worker/configs -rf
-  rm ../scripts/master/*secret* ../scripts/worker/*secret* -rf
+  echo -e "\nDeleting certs inside scripts/master & scripts/worker"
+  rm ../scripts/master/certs ../scripts/worker/certs -rf
 
-  echo "Deleting terraform state"
+  echo -e "\nDeleting terraform state"
   rm terraform.tfstate* -rf
+
+  echo -e "\nDeleting terraform providers"
+  rm .terraform -rf
 fi
