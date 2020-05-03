@@ -85,7 +85,19 @@ docker build -t kthw-azure-image .
 
 ## - Run docker container in interactive terminal with kthw-azure-git directory mounted from the host machine
 ```
-docker run -it --rm --name=kthw-azure-container --mount type=bind,source=$HOME/kthw-azure-git,target=/root/kthw-azure-git kthw-azure-image bash
+docker run -it --name=kthw-azure-container --mount type=bind,source=$HOME/kthw-azure-git,target=/root/kthw-azure-git kthw-azure-image bash
+
+# to logout from container
+exit
+```
+
+## - Resume the docker container in interactive terminal
+```
+# start the containeras it may be in stopped state because of logout
+docker start kthw-azure-container
+
+# attach to the current running process - bash in the started container
+docker attach kthw-azure-container
 ```
 
 ---
@@ -135,14 +147,25 @@ terraform -v
 # Provision environment
 ```
 cd ~/kthw-azure-git/infra
+
+# initialise terraform providers
 terraform init
+
+# read NOTE section below to generate the infrastructure variable values file - azurerm-secret.tfvars
+
+# execute infrastructure provisioning command
 terraform apply -var-file=azurerm-secret.tfvars
+
+# if terraform throws any error, it may be due to dns name conflicts with already deployed infrastructure in the chosen azure location.
+# try to workaround these errors by changing the values of the variable - prefix or environment or location in the variable values file - azurerm-secret.tfvars
 ```
 
 # NOTE
 
 ## - Set the values for the variables by writing to the var file - azurerm-secret.tfvars:
 ```
+cd ~
+
 az login
 az account list
 # note the id as <SUBSCRIPTION_ID> and tenantId as <TENANT_ID> from the output of previous command

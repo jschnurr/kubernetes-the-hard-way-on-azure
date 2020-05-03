@@ -39,7 +39,7 @@ To further debug and diagnose cluster problems, use 'kubectl cluster-info dump'.
 
 ## Verification of kubernetes setup after completion of all actions
 
-### Test data encryption of secret data
+### Test data encryption of secret data (inside master node)
 ```
 cd ~/kthw-azure-git/scripts
 
