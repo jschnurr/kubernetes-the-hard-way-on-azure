@@ -82,4 +82,3 @@ This tutorial project assumes you have access to the [Microsoft Azure](https://p
 * [Install coredns and final smoke tests](scripts/deployments/README.md)
 * [Automated scale and end to end provisioning](docs/automated-setup.md)
 * [Cleaning up](docs/cleanup.md)
-* [Differences to original]
