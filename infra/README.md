@@ -1,21 +1,78 @@
 # Install shell script execution platform
 
 ## - Choose the running platform
-For Windows 10, there are 2 options:
-1. Windows Subsystem for Linux (WSL)*: https://docs.microsoft.com/en-us/windows/wsl/install-win10  
-2. Or, WSL2*: https://docs.microsoft.com/en-us/windows/wsl/wsl2-install  
+For Windows, there are 3 options:
+1. Command Prompt (cmd)
+2. Or, Windows Subsystem for Linux (WSL)* on Windows 10: https://docs.microsoft.com/en-us/windows/wsl/install-win10  
+3. Or, WSL2* on Windows 10: https://docs.microsoft.com/en-us/windows/wsl/wsl2-install  
 *choose Ubuntu 18.04 LTS distro either way
 
 For Linux, there are 2 options:
 1. Ubuntu 18.04.4 LTS (Bionic Beaver): https://releases.ubuntu.com/18.04.4/  
 2. Or, Ubuntu 20.04 LTS (Focal Fossa): https://releases.ubuntu.com/20.04/  
 
-## - Change directory to home in bash terminal
+---
+## Instructions for Command Prompt on Windows:
+
+### - Change directory to home in command prompt
+```
+cd %HOMEDRIVE%%HOMEPATH%
+```
+
+### - Install Git in command prompt
+* Install Git for Windows: https://git-scm.com/download/win
+
+### - Clean kthw-azure-git directory, if already exists
+```
+rd %HOMEDRIVE%%HOMEPATH%\kthw-azure-git /S
+```
+
+### - Clone git repo into kthw-azure git directory
+```
+git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git %HOMEDRIVE%%HOMEPATH%\kthw-azure-git
+```
+
+### - Install docker in command prompt:
+* Install Docker for Windows: https://docs.docker.com/docker-for-windows/install  
+
+### - Build docker image with the image name as kthw-azure-image
+```
+cd %HOMEDRIVE%%HOMEPATH%\kthw-azure-git\infra
+docker build -t kthw-azure-image .
+```
+
+### - Run docker container in interactive terminal with kthw-azure-git directory mounted from the host machine
+```
+docker run -it --name=kthw-azure-container --mount type=bind,source=%HOMEDRIVE%%HOMEPATH%\kthw-azure-git,target=/root/kthw-azure-git kthw-azure-image bash
+
+# if the above command fails with the error 'Unhandled exception: Drive has not been shared' then you need to share your windows home drive (most likely c:) with docker inside docker Settings > Resources > File Sharing
+https://stackoverflow.com/questions/59942110/docker-drive-has-not-been-shared
+
+# to logout from container
+exit
+```
+
+### - Resume the docker container in interactive terminal
+```
+# start the containeras it may be in stopped state because of logout
+docker start kthw-azure-container
+
+# attach to the current running process - bash in the started container
+docker attach kthw-azure-container
+```
+
+>All done with prerequisites on command prompt, now head to section - [Provision infrastructure on cloud](#provision-infrastructure-on-cloud)
+
+---
+
+## Instructions for Ubuntu, WSL or WSL2 users:
+
+### - Change directory to home in bash terminal
 ```
 cd ~
 ```
 
-## - Update and upgrade apt packages:
+### - Update and upgrade apt packages:
 ```
 {
   sudo apt-get update
@@ -23,7 +80,7 @@ cd ~
 }
 ```
 
-## - Install basic prereuisites:
+### - Install basic prereuisites:
 ```
 sudo apt-get install -y \
      apt-transport-https \
@@ -34,12 +91,12 @@ sudo apt-get install -y \
      software-properties-common
 ```
 
-## - Clean kthw-azure-git directory, if already exists
+### - Clean kthw-azure-git directory, if already exists
 ```
 rm ~/kthw-azure-git -rf
 ```
 
-## - Clone git repo into kthw-azure git directory
+### - Clone git repo into kthw-azure git directory
 ```
 git clone https://github.com/ankursoni/kubernetes-the-hard-way-on-azure.git ~/kthw-azure-git
 ```
@@ -100,9 +157,11 @@ docker start kthw-azure-container
 docker attach kthw-azure-container
 ```
 
+>All done with prerequisites for docker image, now head to section - [Provision infrastructure on cloud](#provision-infrastructure-on-cloud)
+
 ---
 
-# Or, install remaining pre-requisites directly on host (not recommended)
+# Or, install remaining pre-requisites directly on Linux or WSL host (not recommended)
 
 ## - Change directory to home
 ```
