@@ -6,7 +6,7 @@ This tutorial project walks you through setting up Kubernetes the hard way. The 
 
 Kubernetes The Hard Way on Azure is optimized for learning, which means taking a not so long route to ensure you understand each task required to bootstrap a Kubernetes cluster. The original long route is shortened with the help of [Terraform](https://www.terraform.io/) and [Bash](https://www.gnu.org/software/bash/) shell scripts for semi automated deployment steps (fun for learning) and also fully automated end to end deployment along with scaling of Kubernetes cluster on Azure.
 
-This tutorial project is a modified version of the original developed by [Kelsey Hightower](https://github.com/kelseyhightower/kubernetes-the-hard-way). While the original one uses GCP as the platform to deploy kubernetes, this project uses Azure. If you prefer the GCP version, refer to the original one [here](https://github.com/kelseyhightower/kubernetes-the-hard-way). There are some more differences to the original and they are documented [here](docs/differences-to-original).
+This tutorial project is a modified version of the original developed by [Kelsey Hightower](https://github.com/kelseyhightower/kubernetes-the-hard-way). While the original one uses GCP as the platform to deploy kubernetes, this project uses Azure. If you prefer the GCP version, refer to the original one [here](https://github.com/kelseyhightower/kubernetes-the-hard-way). There are some more differences to the original and they are documented [here](docs/differences-to-original.md).
 
 > The results of this tutorial should not be viewed as production ready, and may receive limited support from the community, but don't let that stop you from learning!
 
