@@ -1,3 +1,5 @@
+> This tutorial project is a modified version of the original developed by [Kelsey Hightower](https://github.com/kelseyhightower/kubernetes-the-hard-way).
+
 # Kubernetes The Hard Way on Azure
 
 This tutorial project walks you through setting up Kubernetes the hard way. The motivation for this tutorial project is to understand what it takes to set up a fully functioning Kubernetes cluster while utilizing the network, storage and compute resources provided by Microsoft Azure. Even though this tutorial project has deployment automation scripts, it is not meant for people looking to find Microsoft and/or community supported alternative to bring up a Kubernetes cluster in Azure. If that's you then check out [Azure Kubernetes Service](https://azure.microsoft.com/en-gb/services/kubernetes-service/), or the [Getting Started Guides](https://kubernetes.io/docs/setup).
