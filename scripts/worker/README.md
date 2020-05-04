@@ -18,10 +18,6 @@ chmod +x *.sh
 
 ## Create certificates
 ```
-# modify user permissions to execute all shell scripts
-cd ~/kthw-azure-git/scripts
-chmod +x *.sh
-
 # create a directory to hold all the generated certificates
 cd ~/kthw-azure-git/scripts/worker
 mkdir certs
