@@ -219,6 +219,8 @@ terraform apply -var-file=azurerm-secret.tfvars
 
 # if terraform throws any error, it may be due to dns name conflicts with already deployed infrastructure in the chosen azure location.
 # try to workaround these errors by changing the values of the variable - prefix or environment or location in the variable values file - azurerm-secret.tfvars
+# use text editor 'nano' to update the file and then press ctrl+x after you are done editing
+nano azurerm-secret.tfvars
 ```
 
 # NOTE
@@ -315,4 +317,7 @@ worker_disk_size_gb=32
 enable_health_probe=false
 enable_master_setup=false
 enable_worker_setup=false
+
+# if there is a correction needed then use text editor 'nano' to update the file and then press ctrl+x after you are done editing
+nano azurerm-secret.tfvars
 ```
