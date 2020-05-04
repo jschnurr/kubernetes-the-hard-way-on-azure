@@ -8,7 +8,7 @@ RUN apt-get update && \
 RUN apt-get install -y \
         apt-transport-https \
         ca-certificates \
-        curl wget unzip tar openssl ssh \
+        curl wget unzip tar openssl ssh nano \
         lsb-release \
         gnupg-agent gnupg2 \
         software-properties-common
