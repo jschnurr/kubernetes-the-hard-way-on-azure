@@ -112,7 +112,7 @@ sed -i 's|^enable_worker_setup.*$|enable_worker_setup=true|g' azurerm-secret.tfv
 ../scripts/auto-provision.sh ~/log.txt
 ```
 
-Refer to section for [merging the new cluster's kube config file in your default kube config for kubectl commands to run flawlessly](../scripts/deployments/README.md#merge-the-new-cluster's-kube-config-in-your-default-kube-config-for-kubectl-commands-to-run-flawlessly)
+Refer to [section](../scripts/deployments/README.md#merge-the-new-clusters-kube-config-in-your-default-kube-config-for-kubectl-commands-to-run-flawlessly) for merging the new cluster's kube config file in your default kube config for kubectl commands to run flawlessly.
 
 
 ## IMPORTANT NOTE if you are scaling down / decreasing count of master nodes
