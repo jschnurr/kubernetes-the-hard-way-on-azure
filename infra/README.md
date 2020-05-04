@@ -60,6 +60,7 @@ docker start kthw-azure-container
 # attach to the current running process - bash in the started container
 docker attach kthw-azure-container
 ```
+**Note** - here onwards for next instructions and commands, always run inside docker container using the steps mentioned above
 
 >All done with prerequisites on command prompt, now head to section - [Provision infrastructure on cloud](#provision-infrastructure-on-cloud)
 
@@ -156,6 +157,7 @@ docker start kthw-azure-container
 # attach to the current running process - bash in the started container
 docker attach kthw-azure-container
 ```
+**Note** - here onwards for next instructions and commands, always run inside docker container using the steps mentioned above
 
 >All done with prerequisites for docker image, now head to section - [Provision infrastructure on cloud](#provision-infrastructure-on-cloud)
 
