@@ -181,3 +181,25 @@ curl $node_ip:$node_port
 kubectl delete deployment nginx --kubeconfig worker/configs/admin.kubeconfig
 kubectl delete service nginx --kubeconfig worker/configs/admin.kubeconfig
 ```
+
+
+## Merge the new cluster's kube config in your default kube config for kubectl commands to run flawlessly
+```
+# create backup of the default kube config file if already exists
+cp ~/.kube/config ~/.kube/config.bak
+
+cd ~/kthw-azure-git/scripts
+
+# export the variable with merge sequence
+export KUBECONFIG=master/configs/admin.kubeconfig:~/.kube/config.bak
+
+# write the merged kubeconfig to default kube config file
+kubectl config view --flatten > ~/.kube/config
+
+# test out the kubectl command
+kubectl cluster-info
+# verify if the cluster information is that of your newly provisioned kubernetes cluster
+
+# if you wish to restore your original default kube config file
+cp ~/.kube/config.bak ~/.kube/config
+```
