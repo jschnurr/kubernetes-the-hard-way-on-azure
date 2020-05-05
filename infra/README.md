@@ -211,26 +211,8 @@ terraform -v
 ---
 
 # Provision infrastructure on cloud
-```
-cd ~/kthw-azure-git/infra
 
-# initialise terraform providers
-terraform init
-
-# read NOTE section below to generate the infrastructure variable values file - azurerm-secret.tfvars
-
-# execute infrastructure provisioning command
-terraform apply -var-file=azurerm-secret.tfvars
-
-# if terraform throws any error, it may be due to dns name conflicts with already deployed infrastructure in the chosen azure location.
-# try to workaround these errors by changing the values of the variable - prefix or environment or location in the variable values file - azurerm-secret.tfvars
-# use text editor 'nano' to update the file and then press ctrl+x after you are done editing
-nano azurerm-secret.tfvars
-```
-
-# NOTE
-
-## - Set the values for the variables by writing to the var file - azurerm-secret.tfvars:
+## - Set the values for the variables by writing to the var file - azurerm-secret.tfvars
 ```
 cd ~
 
@@ -324,5 +306,23 @@ enable_master_setup=false
 enable_worker_setup=false
 
 # if there is a correction needed then use text editor 'nano' to update the file and then press ctrl+x after you are done editing
+nano azurerm-secret.tfvars
+```
+
+## - Deploy infrastructure
+```
+cd ~/kthw-azure-git/infra
+
+# initialise terraform providers
+terraform init
+
+# read NOTE section below to generate the infrastructure variable values file - azurerm-secret.tfvars
+
+# execute infrastructure provisioning command
+terraform apply -var-file=azurerm-secret.tfvars
+
+# if terraform throws any error, it may be due to dns name conflicts with already deployed infrastructure in the chosen azure location.
+# try to workaround these errors by changing the values of the variable - prefix or environment or location in the variable values file - azurerm-secret.tfvars
+# use text editor 'nano' to update the file and then press ctrl+x after you are done editing
 nano azurerm-secret.tfvars
 ```
