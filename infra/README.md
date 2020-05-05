@@ -232,6 +232,9 @@ ssh-keygen -b 4096 -t rsa -C <EMAIL_ADDRESS>
 cd ~/kthw-azure-git/infra
 cp azurerm.tfvars azurerm-secret.tfvars
 
+
+# subscription, tenant, service principal and ssh variables
+
 # substitute the value for <SUBSCRIPTION_ID> by replacing VALUE in the following command:
 sed -i 's|<SUBSCRIPTION_ID>|VALUE|g' azurerm-secret.tfvars
 # for e.g., the command to substitute the value for <SUBSCRIPTION_ID> with 794a7d2a-565a-4ebd-8dd9-0439763e6b55 as VALUE looks like this:
@@ -250,6 +253,9 @@ sed -i 's|<CLIENT_SECRET>|VALUE|g' azurerm-secret.tfvars
 # VALUE e.g. "~/.ssh/id_rsa.pub"
 sed -i 's|<SSH_PUBLIC_KEY_FILE>|VALUE|g' azurerm-secret.tfvars
 
+
+# prefix, environment and location variables
+
 # substitute the value for <PREFIX> by replacing VALUE in the following command:
 # VALUE e.g. "kthw" or "kube" etc.
 sed -i 's|<PREFIX>|VALUE|g' azurerm-secret.tfvars
@@ -263,6 +269,9 @@ sed -i 's|<ENVIRONMENT>|VALUE|g' azurerm-secret.tfvars
 # run this to know more: "az account list-locations -o table"
 sed -i 's|<LOCATION>|VALUE|g' azurerm-secret.tfvars
 
+
+# master variables
+
 # substitute the value for <MASTER_VM_SIZE> by replacing VALUE in the command
 # VALUE e.g. "Standard_B1ms" or "Standard_DS2_v2" etc. with ssd disk capabilities indicated by 's'
 # run this to know more: "az vm list-sizes --location "<LOCATION>" -o table"
@@ -273,6 +282,9 @@ sed -i 's|<MASTER_VM_SIZE>|VALUE|g' azurerm-secret.tfvars
 # choose 1 if you are learning and later auto-scale
 sed -i 's|<MASTER_VM_COUNT>|VALUE|g' azurerm-secret.tfvars
 
+
+# worker variables
+
 # substitute the value for <WORKER_VM_SIZE> by replacing VALUE in the command
 # VALUE e.g. "Standard_B1ms" or "Standard_DS2_v2" etc. with ssd disk capabilities indicated by 's'
 # run this to know more: "az vm list-sizes --location "<LOCATION>" -o table"
@@ -282,6 +294,7 @@ sed -i 's|<WORKER_VM_SIZE>|VALUE|g' azurerm-secret.tfvars
 # VALUE e.g. 1 or 2 etc. upto a maximum of 9
 # choose 1 if you are learning and later auto-scale
 sed -i 's|<WORKER_VM_COUNT>|VALUE|g' azurerm-secret.tfvars
+
 
 # verify the auzurerm-secret.tfvars file by displaying its content
 cat azurerm-secret.tfvars
