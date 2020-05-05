@@ -316,8 +316,6 @@ cd ~/kthw-azure-git/infra
 # initialise terraform providers
 terraform init
 
-# read NOTE section below to generate the infrastructure variable values file - azurerm-secret.tfvars
-
 # execute infrastructure provisioning command
 terraform apply -var-file=azurerm-secret.tfvars
 
