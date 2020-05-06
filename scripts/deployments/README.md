@@ -1,5 +1,7 @@
 # Install coredns
 
+![topology-coredns](../../docs/images/topology-coredns.png)
+
 ## Initialisation
 ```
 cd ~/kthw-azure-git/infra
