@@ -93,7 +93,9 @@ cd ~/kthw-azure-git/infra
 
 ## Fully automated end to end provisioning
 
-As you may have guessed that this tutorial project allows you to fully provision a kubernetes cluster from the very beginning. To meet this end, you can start again with a blank slate by following the [cleanup](cleanup.md) instructions.
+As you may have guessed that this tutorial project allows you to fully provision a kubernetes cluster from the very beginning. To meet this end:
+* start again with a blank slate by following the [cleanup](cleanup.md) instructions,
+* also, [set up the values for variables](../infra/README.md#--set-the-values-for-the-variables-by-writing-to-the-var-file---azurerm-secrettfvars), if not already done previously.
 
 ```
 cd ~/kthw-azure-git/infra
