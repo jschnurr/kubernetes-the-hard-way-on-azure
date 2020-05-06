@@ -1,5 +1,7 @@
 # Install kubernetes in master node
 
+![topology-master](../../docs/images/topology-master.png)
+
 ## Initialisation
 ```
 cd ~/kthw-azure-git/infra
