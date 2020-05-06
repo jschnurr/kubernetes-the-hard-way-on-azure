@@ -212,6 +212,8 @@ terraform -v
 
 # Provision infrastructure on cloud
 
+![topology-infra](../docs/images/topology-infra.png)
+
 ## - Set the values for the variables by writing to the var file - azurerm-secret.tfvars
 ```
 cd ~
@@ -255,6 +257,11 @@ sed -i 's|<SSH_PUBLIC_KEY_FILE>|VALUE|g' azurerm-secret.tfvars
 
 
 # prefix, environment and location variables
+# these 3 variables help in naming the azure resources
+# for e.g., resource group name: <PREFIX>-<ENVIRONMENT>-rg01
+# for e.g., master virtual machine name: <PREFIX>-<ENVIRONMENT>-mastervm01.<LOCATION_CODE>.cloudapp.azure.com
+# for e.g., worker virtual machine name: <PREFIX>-<ENVIRONMENT>-workervm01.<LOCATION_CODE>.cloudapp.azure.com
+# for e.g., network load balancer name: <PREFIX>-<ENVIRONMENT>-apiserver.<LOCATION_CODE>.cloudapp.azure.com
 
 # substitute the value for <PREFIX> by replacing VALUE in the following command:
 # VALUE e.g. "kthw" or "kube" etc.

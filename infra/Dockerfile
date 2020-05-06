@@ -27,3 +27,6 @@ RUN wget https://releases.hashicorp.com/terraform/0.12.24/terraform_0.12.24_linu
     unzip terraform_0.12.24_linux_amd64.zip && \
     mv terraform /usr/local/bin/ && \
     rm terraform_0.12.24_linux_amd64.zip
+
+# force color prompt
+RUN sed -i 's/^#force_color_prompt/force_color_prompt/' ~/.bashrc

@@ -1,5 +1,7 @@
 # Install kubernetes in worker node
 
+![topology-worker](../../docs/images/topology-worker.png)
+
 ## Initialisation
 ```
 cd ~/kthw-azure-git/infra
