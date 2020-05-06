@@ -2,6 +2,8 @@
 
 Once you have setup the kubernetes by hand, it is time to explore the other avenues in this tutorial project to achieve the same with one line commands.
 
+![topology-automated](images/topology-automated.png)
+
 
 ## Initialisation
 ```
