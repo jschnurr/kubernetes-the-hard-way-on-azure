@@ -70,11 +70,15 @@ sed -i 's|^worker_vm_size.*$|worker_vm_size=VALUE|g' azurerm-secret.tfvars
 # set the variable - 'enable_master_setup' value to true
 sed -i 's|^enable_master_setup.*$|enable_master_setup=true|g' azurerm-secret.tfvars
 
+# set the variable - 'enable_health_probe' value as true, if not already
+sed -i 's|^enable_health_probe.*$|enable_health_probe=true|g' azurerm-secret.tfvars
+
 # set the variable - 'enable_worker_setup' value to true
 sed -i 's|^enable_worker_setup.*$|enable_worker_setup=true|g' azurerm-secret.tfvars
 
 # execute the god mode script to perform one command provisioning and then automatic installation of both master and worker nodes
 ../scripts/auto-provision.sh
+../scripts/auto-setup.sh
 
 # note that this automated script execution will go through all the master nodes (first) and worker nodes (second) and try minor repairs along the way if it is found to be installed already
 ```
