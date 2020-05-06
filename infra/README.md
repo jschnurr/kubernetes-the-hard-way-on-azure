@@ -20,7 +20,8 @@ cd %HOMEDRIVE%%HOMEPATH%
 ```
 
 ### - Install Git in command prompt
-* Install Git for Windows: https://git-scm.com/download/win
+* Install Git for Windows: https://git-scm.com/download/win  
+**Note** - if you freshly installed git for windows then you need to close and start a new command prompt to refresh path environment variable.
 
 ### - Clean kthw-azure-git directory, if already exists
 ```
