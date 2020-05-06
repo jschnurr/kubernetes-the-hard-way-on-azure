@@ -52,6 +52,17 @@ The target of this tutotial project is to achieve the following deployment topol
    * [Linux Virtual Machines](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/overview) with Ubuntu 18.04 LTS OS image. Also, enabled with ip forwarding feature.
    * [Network Interfaces](https://docs.microsoft.com/en-us/azure/virtual-network/virtual-network-network-interface-vm) provide both reserved private ip address and static public ip address.
 
+## Labs
+
+This tutorial project assumes you have access to the [Microsoft Azure](https://portal.azure.com). While Azure is used for basic infrastructure requirements, the lessons learned in this tutorial can be applied to other platforms.
+
+* [Prerequisites and provision infrastructure on cloud](infra/README.md)
+* [Install kubernetes in controller / master node](scripts/master/README.md)
+* [Install kubernetes in worker node](scripts/worker/README.md)
+* [Install coredns and final smoke tests](scripts/deployments/README.md)
+* [Automated scale and end to end provisioning](docs/automated-setup.md)
+* [Cleaning up](docs/cleanup.md)
+
 ## Project structure
 
 This tutorial project has the following folder structure:
@@ -71,14 +82,3 @@ these git ignored folders are a placeholder for dynamically generated client and
 these git ignored folders are a placeholder for dynamically generated client and server configuration files to be used in the setup of kubernetes controllers and nodes respectively.
 * deployments -  
 this folder is a placeholder for yaml deployment definition files to be used for deploying workloads on kubernetes cluster.
-
-## Labs
-
-This tutorial project assumes you have access to the [Microsoft Azure](https://portal.azure.com). While Azure is used for basic infrastructure requirements, the lessons learned in this tutorial can be applied to other platforms.
-
-* [Prerequisites and provision infrastructure on cloud](infra/README.md)
-* [Install kubernetes in controller / master node](scripts/master/README.md)
-* [Install kubernetes in worker node](scripts/worker/README.md)
-* [Install coredns and final smoke tests](scripts/deployments/README.md)
-* [Automated scale and end to end provisioning](docs/automated-setup.md)
-* [Cleaning up](docs/cleanup.md)
