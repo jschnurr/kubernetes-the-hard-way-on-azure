@@ -27,8 +27,8 @@ The target audience for this tutorial is
 
 Kubernetes The Hard Way on Azure guides you through bootstrapping a highly available Kubernetes cluster with end-to-end encryption between components and RBAC authentication.
 
-* [kubernetes](https://github.com/kubernetes/kubernetes) 1.18.1*
-* [containerd](https://github.com/containerd/containerd) 1.2.13*
+* [kubernetes](https://github.com/kubernetes/kubernetes) v1.18.1*
+* [containerd](https://github.com/containerd/containerd) v1.2.13*
 * [coredns](https://github.com/coredns/coredns) v1.6.9*
 * [cni](https://github.com/containernetworking/cni) v0.8.5*
 * [etcd](https://github.com/coreos/etcd) v3.4.7*
