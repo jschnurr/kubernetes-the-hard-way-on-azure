@@ -226,6 +226,10 @@ az ad sp create-for-rbac --role="Contributor" --scopes="/subscriptions/<SUBSCRIP
 ssh-keygen -b 4096 -t rsa -C <EMAIL_ADDRESS>
 # note the path of the file "~/.ssh/id_rsa.pub" as <SSH_PUBLIC_KEY_FILE>
 
+# to make system remember the private key passphrase:
+exec ssh-agent bash
+ssh-add
+
 # copy the template variable file
 cd ~/kthw-azure-git/infra
 cp azurerm.tfvars azurerm-secret.tfvars
