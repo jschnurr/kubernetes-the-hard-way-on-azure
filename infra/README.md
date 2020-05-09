@@ -328,6 +328,11 @@ enable_worker_setup=false
 
 # if there is a correction needed then use text editor 'nano' to update the file and then press ctrl+x after you are done editing
 nano azurerm-secret.tfvars
+
+# note for users who started from windows command prompt
+# replace the line ending from \r\n to just \n in the var file
+# this action is needed because the git clone operation happened on command prompt and windows puts \r\n for line endings while linux understands \n for line endings
+sed -i 's/\r$//g' azurerm-secret.tfvars
 ```
 
 ## - Deploy infrastructure
