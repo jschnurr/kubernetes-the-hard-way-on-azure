@@ -49,11 +49,6 @@ docker run -it --name=kthw-azure-container --mount type=bind,source=%HOMEDRIVE%%
 # if the above command fails with the error 'Unhandled exception: Drive has not been shared' then you need to share your windows home drive (most likely c:) with docker inside docker Settings > Resources > File Sharing
 https://stackoverflow.com/questions/59942110/docker-drive-has-not-been-shared
 
-# replace the line ending from \r\n to just \n in all the script files
-# this action is needed because the git clone operation happened on command prompt and windows puts \r\n for line endings while linux understands \n for line endings
-cd ~/kthw-azure-git/scripts
-sed -i 's/\r$//g' *.sh
-
 # to logout from container
 exit
 ```
