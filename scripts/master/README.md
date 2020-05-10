@@ -188,11 +188,11 @@ wget -q --show-progress --https-only --timestamping \
 
 # prepare etcd service systemd unit file
 
-# substitute the value for <HOSTNAME>
+# auto substitute the value for <HOSTNAME>
 # e.g. "kthw-play-mastervm01" for mastervm01 with 'kthw' as prefix and 'play' as environmemt
 sed -i "s|<HOSTNAME>|$(hostname -s)|g" etcd.service
 
-# substitute the value for <INTERNAL_IP>
+# auto substitute the value for <INTERNAL_IP>
 # e.g. "10.240.0.11" for mastervm01, "10.240.0.12" for mastervm02 etc.
 sed -i "s|<INTERNAL_IP>|$(hostname -i)|g" etcd.service
 
@@ -279,7 +279,7 @@ wget -q --show-progress --https-only --timestamping \
 
 # prepare kube-apiserver service systemd unit file
 
-# substitute the value for <INTERNAL_IP>
+# auto substitute the value for <INTERNAL_IP>
 # e.g. "10.240.0.11" for mastervm01, "10.240.0.12" for mastervm02 etc.
 sed -i "s|<INTERNAL_IP>|$(hostname -i)|g" kube-apiserver.service
 

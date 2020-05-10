@@ -140,6 +140,8 @@ kubectl port-forward $pod_name 8080:80 --kubeconfig worker/configs/admin.kubecon
 
 # try accessing port 8080 on host in a separate terminal
 curl 127.0.0.1:8080
+# if you are running this on a container then execute this instead in a new command prompt / terminal
+docker exec -it kthw-azure-container curl 127.0.0.1:8080
 
 # output should be something like this
 <!DOCTYPE html>
